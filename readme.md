@@ -109,6 +109,13 @@ https://learn.adafruit.com/force-sensitive-resistor-fsr/using-an-fsr
 
 
 
+## Teensy Audio
+
+https://www.pjrc.com/store/teensy3_audio.html
+
+
+
+
 
 # Python GUI
 
@@ -125,6 +132,15 @@ Tinkering a lot to do basic FSR reading. For reasons that I don't understand, it
 Then it also worked when I plugged it into the 3.3V that is next to GND/Program/A14 (and leave the ground as GND).
 
 
+## 30 Sept 2017
+A basic working version for collecting taps. Created a Python GUI to read the tap information live. Nice!
+
+When adding the audio shield, I realise that it will use the A0 pin (as well as A1) so I cannot use it for reading the FSR. No worries, based on their [schematic](https://www.pjrc.com/store/teensy3_audio_pins.png) I think I can use A2 for reading the FSR, it is free.
+
+I am also wondering whether sounds should be played from the SD card or otherwise pre-loaded. It seems to me that you can include sounds as a header so that they are played directly from memory.
+
+Had trouble getting sound output.
+
 
 
 # TODO
@@ -132,5 +148,8 @@ Then it also worked when I plugged it into the 3.3V that is next to GND/Program/
 - [ ] Deal with timer overflows (can we set the timer to zero manually?)
 - [ ] Fine-tune the resistance so that it yields optimal SNR
 - [ ] Communicate tap times to computer
+- [ ] Auditory feedback
+- [ ] Delayed auditory feedback
+- [ ] Metronome
 
 

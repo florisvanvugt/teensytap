@@ -25,14 +25,6 @@ except:
 
 
 
-# Set up the main interface scree
-w,h= 800,600
-    
-master = Tk()
-master.geometry('%dx%d+%d+%d' % (w, h, 500, 200))
-
-
-
 def launch():
     # Launch a trial
     global config
@@ -84,6 +76,51 @@ def listen():
     
 
 
+
+
+def build_gui():
+    
+    #
+    # 
+    # Build the GUI
+    #
+    #
+
+    # Set up the main interface scree
+    w,h= 800,600
+    
+    master = Tk()
+    master.geometry('%dx%d+%d+%d' % (w, h, 500, 200))
+
+    buttonframe = Frame(master) #,padding="3 3 12 12")
+
+    buttonframe.pack(padx=10,pady=10)
+    row = 0
+    launchb = Button(buttonframe,text="launch",        command=launch) .grid(column=0, row=row, sticky=W)
+
+    row+=1
+    commport = StringVar()
+    commport.set("/dev/ttyACM0") # default comm port
+    Label(buttonframe, text="comm port").grid(column=0,row=row,sticky=W)
+    ttydev  = Entry(buttonframe,textvariable=commport).grid(column=1,row=row,sticky=W)
+    config["commport"]=commport
+
+    row+=1
+    report = ScrolledText(master)
+    report.pack(padx=10,pady=10,fill=BOTH,expand=True)
+    config["report"]=report
+
+
+    # Draw the background against which everything else is going to happen
+    master.protocol("WM_DELETE_WINDOW", on_closing)
+
+    config["master"]=master
+
+
+
+
+
+            
             
 global config
 config = {}
@@ -92,38 +129,8 @@ config["capturing"]=False
 
 
 
-#
-# 
-# Build the GUI
-#
-#
 
-buttonframe = Frame(master) #,padding="3 3 12 12")
-
-buttonframe.pack(padx=10,pady=10)
-row = 0
-launchb = Button(buttonframe,text="launch",        command=launch) .grid(column=0, row=row, sticky=W)
-
-row+=1
-commport = StringVar()
-commport.set("/dev/ttyACM0") # default comm port
-Label(buttonframe, text="comm port").grid(column=0,row=row,sticky=W)
-ttydev  = Entry(buttonframe,textvariable=commport).grid(column=1,row=row,sticky=W)
-config["commport"]=commport
-
-row+=1
-report = ScrolledText(master)
-report.pack(padx=10,pady=10,fill=BOTH,expand=True)
-config["report"]=report
-
-
-# Draw the background against which everything else is going to happen
-master.protocol("WM_DELETE_WINDOW", on_closing)
-
-
-
-
-
+build_gui()
 
 
 keep_going = True
@@ -132,8 +139,8 @@ while keep_going:
 
     listen()
 
-    master.update_idletasks()
-    master.update()
+    config["master"].update_idletasks()
+    config["master"].update()
     
     time.sleep(0.01) # frame rate of our GUI update
 
