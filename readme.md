@@ -122,4 +122,10 @@ Then it also worked when I plugged it into the 3.3V that is next to GND/Program/
 
 
 
+# TODO
+
+- [ ] Deal with timer overflows (can we set the timer to zero manually?)
+- [ ] Fine-tune the resistance so that it yields optimal SNR
+- [ ] Communicate tap times to computer
+
 

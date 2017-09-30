@@ -15,3 +15,6 @@ upload: teensy_tap.ino
 	arduino --upload teensy_tap.ino
 
 
+serial:
+	cat /dev/ttyACM0
+
