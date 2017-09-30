@@ -110,6 +110,11 @@ https://learn.adafruit.com/force-sensitive-resistor-fsr/using-an-fsr
 
 
 
+# Python GUI
+
+Requirements: `pyserial` (`pip install pyserial`).
+
+
 
 
 # Log

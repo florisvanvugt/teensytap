@@ -18,3 +18,7 @@ upload: teensy_tap.ino
 serial:
 	cat /dev/ttyACM0
 
+
+
+gui:
+	python3 gui.py
