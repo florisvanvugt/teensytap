@@ -139,8 +139,7 @@ When adding the audio shield, I realise that it will use the A0 pin (as well as 
 
 I am also wondering whether sounds should be played from the SD card or otherwise pre-loaded. It seems to me that you can include sounds as a header so that they are played directly from memory.
 
-Had trouble getting sound output.
-
+Had trouble getting sound output. I think the issue is the Teensy is simply not interfacing with the audio board at all. This may be because I had not soldered it. This seems a good explanation of the soldering [here](https://www.youtube.com/watch?v=37mW1i_oEpA).
 
 
 # TODO
