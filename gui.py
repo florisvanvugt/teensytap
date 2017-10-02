@@ -8,6 +8,7 @@ serial_timeout = .01 # the timeout (in seconds) for port reading
 
 
 # Define the communication protocol with the Teensy (needs to match the corresponding variables in Teensy)
+MESSAGE_CONFIG = 88
 MESSAGE_START  = 77
 MESSAGE_STOP   = 55
 
@@ -133,13 +134,36 @@ def launch():
         if trialinfo[val]==None:
             return # Conversion failed
 
-        
+
+    print(trialinfo)
+    
     # Okay, so now we need to talk to Teensy to tell him to start this trial
+
+    # First, tell Teensy to stop whatever it is it is doing at the moment (go to non-active mode)
+    config["comm"].write(struct.pack('!B',MESSAGE_STOP))
+
+    config["comm"].write(struct.pack('!B',MESSAGE_CONFIG))
+
+    # Now we tell Teensy that we are going to send some config information
+    config["comm"].write(struct.pack('6i',
+                                     trialinfo["auditory.feedback"],
+                                     trialinfo["auditory.fb.delay"],
+                                     trialinfo["metronome"],
+                                     trialinfo["metronome.interval"],
+                                     trialinfo["metronome.nclicks"],
+                                     trialinfo["ncontinuation.clicks"]))
+
+    time.sleep(1) # Just wait a moment to allow Teensy to process
+    
+
+
+
+def go():
+    # Okay, when it has swallowed all this, now we can make it start!
     config["comm"].write(struct.pack('!B',MESSAGE_START))
 
-
-
-
+    
+    
     
 def abort():
     config["comm"].write(struct.pack('!B',MESSAGE_STOP))
@@ -215,7 +239,8 @@ def build_gui():
 
     row += 1
     Button(buttonframe,text="launch",        command=launch) .grid(column=2, row=row, sticky=W, padx=5,pady=20)
-    Button(buttonframe,text="abort",         command=abort)  .grid(column=3, row=row, sticky=W, padx=5,pady=20)
+    Button(buttonframe,text="go",            command=go)     .grid(column=3, row=row, sticky=W, padx=5,pady=20)
+    Button(buttonframe,text="abort",         command=abort)  .grid(column=4, row=row, sticky=W, padx=5,pady=20)
     
     
     row+=1

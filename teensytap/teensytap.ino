@@ -72,7 +72,18 @@ unsigned long next_metronome_t            = 0; // the time at which we should pl
 
 
 
-int msg_number = 0; // keep track of how many messages we have sent over the serial interface (to be able to track down possible missing messages)
+
+
+/*
+  Information pertaining to the trial we are currently running
+*/
+
+int auditory_feedback = 0;       // whether we present a tone at every tap
+int auditory_feedback_delay = 0; // the delay between the tap and the to-be-presented feedback
+int metronome = 0;               // whether to present a metronome sound
+int metronome_nclicks = 0;       // how many clicks of the metronome to present on this trial
+int ncontinuation_clicks = 0;    // how many continuation clicks to present after the metronome stops
+
 
 
 
@@ -109,11 +120,17 @@ AudioControlSGTL5000 audioShield;
 */
 
 
+int msg_number = 0; // keep track of how many messages we have sent over the serial interface (to be able to track down possible missing messages)
+
 long baudrate = 9600; // the serial communication baudrate; not sure whether this actually does anything because Teensy documentation suggests that USB communication is always the highest possible.
 
-const int MESSAGE_START = 77; // Signal to the Teensy to start
-const int MESSAGE_STOP  = 55; // Signal to the Teensy to stop
 
+const int MESSAGE_START   = 77;   // Signal to the Teensy to start
+const int MESSAGE_CONFIG  = 88;   // Signal to the Teensy that we are going to send a trial configuration
+const int MESSAGE_STOP    = 55;   // Signal to the Teensy to stop
+
+const int CONFIG_LENGTH = 6*4; /* Defines the length of the configuration packet */
+  
 
 
 
@@ -271,12 +288,14 @@ void loop(void) {
   if (Serial.available()) {
     int inByte = Serial.read();
 
-    //Serial.print("Got serial message:");
     Serial.print(inByte);
-    if (inByte==MESSAGE_START) {
+    if (inByte==MESSAGE_CONFIG) { // We are going to receive config information from the PC
+      read_config_from_serial();
+    }
+    if (inByte==MESSAGE_START) {  // Switch to active mode
       active = 1;
     }
-    if (inByte==MESSAGE_STOP) {
+    if (inByte==MESSAGE_STOP) {   // Switch to inactive mode
       active = 0;
     }
     
@@ -284,6 +303,68 @@ void loop(void) {
   
 }
 
+
+
+
+
+long readint() {
+  /* Reads an int (well, really a long int in Arduino land) from the Serial interface */
+  union {
+    byte asBytes[4];
+    long asLong;
+  } reading;
+  
+  for (int i=0;i<4;i++){
+    reading.asBytes[i] = (byte)Serial.read();
+  }
+  return reading.asLong;
+
+}
+
+
+
+void read_config_from_serial() {
+  /* 
+     This function runs when we are about to receive configuration
+     instructions from the PC.
+  */
+  Serial.print("Receiving configuration...\n");
+
+  while (!(Serial.available()>=CONFIG_LENGTH)) {
+    // Wait until we have enough info
+  }
+  Serial.print("... starting to read...\n");
+  
+  auditory_feedback       = readint();
+  auditory_feedback_delay = readint();
+  metronome               = readint();
+  metronome_interval      = readint();
+  metronome_nclicks       = readint();
+  ncontinuation_clicks    = readint();
+
+  Serial.print("Config received...\n");
+  send_config_to_serial();
+  
+}
+
+
+
+
+void send_config_to_serial() {
+  /* Sends a dump of the current config to the serial. */
+
+  char msg[200];
+  msg_number += 1; // This is the next message
+  sprintf(msg, "config %i %i %i %i %i %i\n",
+	  auditory_feedback,
+	  auditory_feedback_delay,
+	  metronome,
+	  metronome_interval,
+	  metronome_nclicks,
+	  ncontinuation_clicks);
+  Serial.print(msg);
+
+}
 
 
 
