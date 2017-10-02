@@ -27,10 +27,14 @@
 #include <Bounce.h>
 
 #include "AudioSampleTap.h" 
+#include "AudioSampleMetronome.h" 
+
+
 
 /*
   Setting up infrastructure for capturing taps (from a connected FSR)
 */
+
 
 int fsrAnalogPin = 3; // FSR is connected to analog 3 (A3)
 int fsrReading;      // the analog reading from the FSR resistor divider
@@ -65,6 +69,14 @@ int missed_frames = 0; // ideally our script should read the FSR every milliseco
 
 
 
+int metronome_interval = 600; // Time between metronome clicks
+
+unsigned long next_metronome_t            = 0; // the time at which we should play the next metronome beat
+
+
+
+
+
 
 
 
@@ -80,14 +92,12 @@ AudioPlayMemory    sound0;
 AudioPlayMemory    sound1;  // six memory players, so we can play
 AudioMixer4        mix1;   // one four-channel mixer (we'll only use two channels)
 AudioOutputI2S     headphones;
-AudioOutputAnalog  dac;     // play to both I2S audio board and on-chip DAC --- FVV TODO Probably I don't need this
 
 // Create Audio connections between the components
 //
 AudioConnection c1(sound0, 0, mix1, 0);
 AudioConnection c2(sound1, 0, mix1, 1);
-AudioConnection c8(mix1, 0, headphones, 0);
-//AudioConnection c10(mix2, 0, dac, 0); // FVV TODO Probably I don't need this
+AudioConnection c3(mix1, 0, headphones, 0);
 
 // Create an object to control the audio shield.
 AudioControlSGTL5000 audioShield;
@@ -102,7 +112,6 @@ void setup(void) {
   Serial.begin(baudrate);  // Initiate serial communication
   Serial.print("TeensyTap starting...\n");
 
-
   // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
   AudioMemory(10);
@@ -110,11 +119,6 @@ void setup(void) {
   // turn on the output
   audioShield.enable();
   audioShield.volume(sound_volume);
-
-  // by default the Teensy 3.1 DAC uses 3.3Vp-p output
-  // if your 3.3V power has noise, switching to the
-  // internal 1.2V reference can give you a clean signal
-  dac.analogReference(INTERNAL);
 
   // reduce the gain on mixer channels, so more than 1
   // sound can play simultaneously without clipping
@@ -133,7 +137,10 @@ void loop(void) {
   /* This is the main loop function which will be executed ad infinitum */
 
   current_t = millis(); // get current time (in ms)
-  if (prev_t == 0) { prev_t = current_t; } // To prevent seeming "lost frames"
+
+  /* If this is our first loop ever, initialise the time points at which we should start taking action */
+  if (prev_t == 0)           { prev_t = current_t; } // To prevent seeming "lost frames"
+  if (next_metronome_t == 0) { next_metronome_t = current_t+metronome_interval; }
 
   if (current_t > prev_t) {
     // Main loop tick (one ms has passed)
@@ -210,6 +217,21 @@ void loop(void) {
       
     }
 
+
+    /* 
+     * Deal with the metronome
+    */
+    // Is this a time to play a metronome click?
+    if (current_t > next_metronome_t) {
+
+      // Play metronome click
+      sound1.play(AudioSampleMetronome);
+
+      // And schedule the next upcoming metronome click
+      next_metronome_t += metronome_interval;
+      
+    }
+    
     
     // Update the loop time
     prev_t = current_t;

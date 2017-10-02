@@ -113,9 +113,9 @@ https://learn.adafruit.com/force-sensitive-resistor-fsr/using-an-fsr
 
 https://www.pjrc.com/store/teensy3_audio.html
 
-There are connectors on a number of pins:
+Note that you cannot use this until you have soldered it fixed to the board.
 
-
+To play audio, you can use the Teensy Audio library. It doesn't have a lot of documentation though (at present). The documentation that there is is based on a tutorial in which the hardware setup is different (Teensy + Audio but also a bunch of buttons etc.). 
 
 
 
@@ -168,7 +168,9 @@ By the way, I like this wav2sketch thing that allows you to convert a wav file i
 
 Also soldered connectors for the FSR on to the Teensy. I had to move from A0 for reading the FSR voltage to A3 because A0 was in use. First I didn't get a good reading (just oscillating values), which was fixed when I resoldered the connector.
 
+Downloaded a metronome sound from [here](https://freesound.org/people/digifishmusic/sounds/49115/). Cut it into pieces manually.
 
+You can convert a WAV to C code that you can include directly into the Teensy program hence avoiding the need for the SD card. The code for this is [wav2sketch](https://raw.githubusercontent.com/UECIDE/Teensy3/master/cores/teensy3/files/libraries/Audio/examples/SamplePlayer/wav2sketch/wav2sketch.c). When you run it it will automatically convert all audio files in that directory to C code.
 
 
 
