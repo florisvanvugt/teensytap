@@ -69,8 +69,7 @@ int missed_frames = 0; // ideally our script should read the FSR every milliseco
 int metronome_interval = 600; // Time between metronome clicks
 
 unsigned long next_metronome_t            = 0; // the time at which we should play the next metronome beat
-
-
+unsigned long next_tap_t                  = 0; // the time at which the next tap sound should occur
 
 
 
@@ -212,7 +211,8 @@ void do_activity() {
 	// don't allow an offset immediately; freeze the phase for a little while
 	next_event_embargo_t = current_t + min_tap_on_duration;
 
-	sound0.play(AudioSampleTap);
+	// Schedule the next tap feedback time (if we deliver feedback)
+	next_tap_t = current_t + auditory_feedback_delay;
       }
       
     } else if (tap_phase==1) {
@@ -253,18 +253,35 @@ void do_activity() {
      * Deal with the metronome
     */
     // Is this a time to play a metronome click?
-    if (current_t > next_metronome_t) {
-
-      // Play metronome click
-      sound1.play(AudioSampleMetronome);
-
-      // And schedule the next upcoming metronome click
-      next_metronome_t += metronome_interval;
-
-      // Proudly tell the world that we have played the metronome click
-      send_metronome_to_serial();
+    if (metronome) {
+      if (current_t > next_metronome_t) {
+	
+	// Play metronome click
+	sound1.play(AudioSampleMetronome);
+	
+	// And schedule the next upcoming metronome click
+	next_metronome_t += metronome_interval;
+	
+	// Proudly tell the world that we have played the metronome click
+	send_metronome_to_serial();
+      }
     }
-    
+
+    if (auditory_feedback) {
+      
+      if ((next_tap_t != 0) && (current_t > next_tap_t)) {
+
+	// Play the auditory feedback (relating to the subject's tap)
+	sound0.play(AudioSampleTap);
+
+	// Clear the queue, nothing more to play
+	next_tap_t = 0;
+	
+	// Proudly tell the world that we have played the tap sound
+	send_feedback_to_serial();
+      }
+
+    }
     
     // Update the loop time
     prev_t = current_t;
@@ -387,6 +404,19 @@ void send_tap_to_serial() {
 
 
 
+void send_feedback_to_serial() {
+  /* Sends information about the current tap to the PC through the serial interface */
+  char msg[100];
+  msg_number += 1; // This is the next message
+  sprintf(msg, "%d feedback %lu NA NA NA %d\n",
+	  msg_number,
+	  current_t,
+	  missed_frames);
+  Serial.print(msg);
+}
+
+
+
 
 void send_metronome_to_serial() {
   /* Sends information about the current tap to the PC through the serial interface */
@@ -397,5 +427,5 @@ void send_metronome_to_serial() {
 	  current_t,
 	  missed_frames);
   Serial.print(msg);
-  
 }
+
