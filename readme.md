@@ -172,6 +172,10 @@ Downloaded a metronome sound from [here](https://freesound.org/people/digifishmu
 
 You can convert a WAV to C code that you can include directly into the Teensy program hence avoiding the need for the SD card. The code for this is [wav2sketch](https://raw.githubusercontent.com/UECIDE/Teensy3/master/cores/teensy3/files/libraries/Audio/examples/SamplePlayer/wav2sketch/wav2sketch.c). When you run it it will automatically convert all audio files in that directory to C code.
 
+Now trying to figure out a way in which the PC can send instructions for a particular trial to the Teensy. This should involve some very simple data packet, that will then send Teensy on its way to run the trial. I think I would like the Teensy to start in some kind of "listening" state, and then you send it the instructions for a trial and then it runs. It sounds best not to disturb the Teensy during the trial.
+
+
+
 
 
 
@@ -179,11 +183,12 @@ You can convert a WAV to C code that you can include directly into the Teensy pr
 
 - [ ] Deal with timer overflows (can we set the timer to zero manually?)
 - [ ] Fine-tune the resistance so that it yields optimal SNR
-- [ ] Communicate tap times to computer
-- [ ] Auditory feedback
+- [x] Communicate tap times to computer
+- [x] Communicate metronome times to computer
+- [x] Metronome
+- [x] Auditory feedback
 - [ ] Delayed auditory feedback
-- [ ] Metronome
 - [ ] Check that the tap timings actually make sense; perhaps plot them; do we get lots of minimal tap/inter-tap-durations?
-
-
+- [ ] Make sure participants cannot see the LED, because it blinks in relation to the amount of sound output!
+- [ ] Currently sound is mono, so it will sound in the left ear only for a stereo plug. Use mono2stereo plug?
 

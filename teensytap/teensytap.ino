@@ -21,19 +21,19 @@
  */
 
 #include <Audio.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
-#include <Bounce.h>
 
-#include "AudioSampleTap.h" 
-#include "AudioSampleMetronome.h" 
+
+// Load the samples that we will play for taps and metronome clicks, respectively
+#include "AudioSampleTap.h"
+#include "AudioSampleMetronome.h"
 
 
 
 /*
   Setting up infrastructure for capturing taps (from a connected FSR)
 */
+
+int active = 0; // Whether the tap capturing & metronome and all is currently active
 
 
 int fsrAnalogPin = 3; // FSR is connected to analog 3 (A3)
@@ -59,10 +59,7 @@ unsigned long tap_offset_t = 0; // the offset time of the current tap
 int           tap_max_force = 0; // the maximum force reading during the current tap
 unsigned long tap_max_force_t = 0; // the time at which the maximum tap force was experienced
 
-int tap_number = 0; // keep track of how many taps we have sent (to be able to later find whether some got lost along the way)
 
-
-long baudrate = 9600; // the serial communication baudrate; not sure whether this actually does anything because Teensy documentation suggests that USB communication is always the highest possible.
 
 
 int missed_frames = 0; // ideally our script should read the FSR every millisecond. we use this variable to check whether it may have skipped a millisecond
@@ -75,6 +72,7 @@ unsigned long next_metronome_t            = 0; // the time at which we should pl
 
 
 
+int msg_number = 0; // keep track of how many messages we have sent over the serial interface (to be able to track down possible missing messages)
 
 
 
@@ -106,6 +104,24 @@ AudioControlSGTL5000 audioShield;
 
 
 
+/*
+  Serial communication stuff
+*/
+
+
+long baudrate = 9600; // the serial communication baudrate; not sure whether this actually does anything because Teensy documentation suggests that USB communication is always the highest possible.
+
+const int MESSAGE_START = 77; // Signal to the Teensy to start
+const int MESSAGE_STOP  = 55; // Signal to the Teensy to stop
+
+
+
+
+
+
+
+
+
 void setup(void) {
   /* This function will be executed once when we power up the Teensy */
   
@@ -126,37 +142,36 @@ void setup(void) {
   mix1.gain(1, 0.5);
 
   Serial.print("TeensyTap ready.\n");
+
+  active = 0;
 }
 
 
 
 
 
-
-void loop(void) {
-  /* This is the main loop function which will be executed ad infinitum */
-
-  current_t = millis(); // get current time (in ms)
-
+void do_activity() {
+  /* This is the usual activity loop */
+  
   /* If this is our first loop ever, initialise the time points at which we should start taking action */
   if (prev_t == 0)           { prev_t = current_t; } // To prevent seeming "lost frames"
   if (next_metronome_t == 0) { next_metronome_t = current_t+metronome_interval; }
-
+  
   if (current_t > prev_t) {
     // Main loop tick (one ms has passed)
-
-
+    
+    
     if (current_t-prev_t > 1) {
       // We missed a frame (or more)
       missed_frames += (current_t-prev_t);
     }
     
-
+    
     /*
      * Collect data
      */
     fsrReading = analogRead(fsrAnalogPin);
-
+    
     
     
 
@@ -176,7 +191,6 @@ void loop(void) {
 
 	// New Tap Onset
 	tap_phase = 1; // currently we are in the tap "ON" phase
-	tap_number += 1; // new tap!
 	tap_onset_t = current_t;
 	// don't allow an offset immediately; freeze the phase for a little while
 	next_event_embargo_t = current_t + min_tap_on_duration;
@@ -229,7 +243,9 @@ void loop(void) {
 
       // And schedule the next upcoming metronome click
       next_metronome_t += metronome_interval;
-      
+
+      // Proudly tell the world that we have played the metronome click
+      send_metronome_to_serial();
     }
     
     
@@ -237,6 +253,34 @@ void loop(void) {
     prev_t = current_t;
   }
 
+}
+
+
+
+
+void loop(void) {
+  /* This is the main loop function which will be executed ad infinitum */
+
+  current_t = millis(); // get current time (in ms)
+
+  if (active) { do_activity(); }
+
+  /* 
+     Read the serial port, see if some message is available for us.
+  */
+  if (Serial.available()) {
+    int inByte = Serial.read();
+
+    //Serial.print("Got serial message:");
+    Serial.print(inByte);
+    if (inByte==MESSAGE_START) {
+      active = 1;
+    }
+    if (inByte==MESSAGE_STOP) {
+      active = 0;
+    }
+    
+  }
   
 }
 
@@ -247,12 +291,29 @@ void loop(void) {
 void send_tap_to_serial() {
   /* Sends information about the current tap to the PC through the serial interface */
   char msg[100];
-  sprintf(msg, "%d %lu %lu %lu %d %d\n",
-	  tap_number,
+  msg_number += 1; // This is the next message
+  sprintf(msg, "%d tap %lu %lu %lu %d %d\n",
+	  msg_number,
 	  tap_onset_t,
 	  tap_offset_t,
 	  tap_max_force_t,
 	  tap_max_force,
+	  missed_frames);
+  Serial.print(msg);
+  
+}
+
+
+
+
+
+void send_metronome_to_serial() {
+  /* Sends information about the current tap to the PC through the serial interface */
+  char msg[100];
+  msg_number += 1; // This is the next message
+  sprintf(msg, "%d click %lu NA NA NA %d\n",
+	  msg_number,
+	  current_t,
 	  missed_frames);
   Serial.print(msg);
   

@@ -7,6 +7,11 @@ serial_timeout = .01 # the timeout (in seconds) for port reading
 
 
 
+# Define the communication protocol with the Teensy (needs to match the corresponding variables in Teensy)
+MESSAGE_START  = 77
+MESSAGE_STOP   = 55
+
+
 
 
 from tkinter import *
@@ -14,19 +19,28 @@ import time
 
 from tkinter import messagebox
 from tkinter.scrolledtext import ScrolledText
+import struct
+
+
+def error_message(msg):
+    print(msg)
+    messagebox.showinfo("Error", msg)
+    return
+
+
 
 try:
     import serial
 except:
     msg = "An error occurred while importing the pySerial module.\n\nGo to https://pypi.python.org/pypi/pyserial to install the module,\nor refer to our manual for help.\n\nThe program will now quit."
-    print(msg)
-    messagebox.showinfo("Error importing pySerial", msg)
+    error_message(msg)
     sys.exit(-1)
 
 
 
-def launch():
-    # Launch a trial
+def openserial():
+    # Open serial communications with the Teensy
+    # This assumes that the Teensy is connected (otherwise the device will not be created).
     global config
 
     port = config["commport"].get()
@@ -44,6 +58,8 @@ def launch():
     
     
 
+
+    
 def on_closing():
     global keep_going
     keep_going = False
@@ -78,6 +94,59 @@ def listen():
 
 
 
+            
+def check_and_convert_int(key,datadict):
+    """ Check that a particular key in the datadict is really associated with an int, and if so, cast it to that datatype."""
+    if key not in datadict:
+        error_message("Internal error -- %s variable is not set")
+        return
+
+    val = datadict[key].strip()
+    
+    if not val.isdigit():
+        error_message("Error, you entered '%s' for %s but that has to be an integer (whole) number"%(val,key))
+        return
+
+    return int(val)
+                      
+
+
+
+
+def launch():
+    # Launch a trial
+
+    # First, let's collect and verify the data
+
+    trialinfo = {}
+
+    trialinfo["auditory.feedback"]   =config["auditoryfb"].get()
+    trialinfo["auditory.fb.delay"]   =config["fbdelay"].get()
+    trialinfo["metronome"]           =config["metronome"].get()
+    trialinfo["metronome.interval"]  =config["metronome_interval"].get()
+    trialinfo["metronome.nclicks"]   =config["nclicks"].get()
+    trialinfo["ncontinuation.clicks"]=config["ncontinuation"].get()
+
+    # Verify that string data is really an integer
+    for val in ["auditory.fb.delay","metronome.interval","metronome.nclicks","ncontinuation.clicks"]:
+        trialinfo[val] = check_and_convert_int(val,trialinfo)
+        if trialinfo[val]==None:
+            return # Conversion failed
+
+        
+    # Okay, so now we need to talk to Teensy to tell him to start this trial
+    config["comm"].write(struct.pack('!B',MESSAGE_START))
+
+
+
+
+    
+def abort():
+    config["comm"].write(struct.pack('!B',MESSAGE_STOP))
+    
+    
+
+
 def build_gui():
     
     #
@@ -87,24 +156,68 @@ def build_gui():
     #
 
     # Set up the main interface scree
-    w,h= 800,600
+    w,h= 800,700
     
-    master = Tk()
+    master = Tk() #"TeensyTap")
+    master.title("TeensyTap")
     master.geometry('%dx%d+%d+%d' % (w, h, 500, 200))
 
     buttonframe = Frame(master) #,padding="3 3 12 12")
 
     buttonframe.pack(padx=10,pady=10)
     row = 0
-    launchb = Button(buttonframe,text="launch",        command=launch) .grid(column=0, row=row, sticky=W)
-
-    row+=1
+    openb = Button(buttonframe,text="open",        command=openserial) .grid(column=2, row=row, sticky=W)
     commport = StringVar()
     commport.set("/dev/ttyACM0") # default comm port
     Label(buttonframe, text="comm port").grid(column=0,row=row,sticky=W)
     ttydev  = Entry(buttonframe,textvariable=commport).grid(column=1,row=row,sticky=W)
     config["commport"]=commport
 
+    row += 1
+    config["auditoryfb"] = IntVar()
+    c = Checkbutton(buttonframe, text="Auditory feedback", variable=config["auditoryfb"])
+    c.grid(column=0,row=row,sticky=W,padx=5,pady=5)
+
+    row+=1
+    Label(buttonframe, text="delay").grid(column=0,row=row,sticky=E)
+    config["fbdelay"] = StringVar()
+    config["fbdelay"].set("0")
+    Entry(buttonframe,textvariable=config["fbdelay"]).grid(column=1,row=row,sticky=W)
+    Label(buttonframe, text="ms").grid(column=2,row=row,sticky=W)
+
+
+    row += 1
+    config["metronome"] = IntVar()
+    c = Checkbutton(buttonframe, text="Metronome", variable=config["metronome"])
+    c.grid(column=0,row=row,sticky=W,padx=5,pady=10)
+
+    row += 1
+    Label(buttonframe, text="interval").grid(column=0,row=row,sticky=E)
+    config["metronome_interval"] = StringVar()
+    config["metronome_interval"].set("600")
+    Entry(buttonframe,textvariable=config["metronome_interval"]).grid(column=1,row=row,sticky=W)
+    Label(buttonframe, text="ms").grid(column=2,row=row,sticky=W)
+
+
+    row += 1
+    Label(buttonframe, text="# clicks").grid(column=0,row=row,sticky=E)
+    config["nclicks"] = StringVar()
+    config["nclicks"].set("10")
+    Entry(buttonframe,textvariable=config["nclicks"]).grid(column=1,row=row,sticky=W)
+
+
+    row += 1
+    Label(buttonframe, text="# continuation clicks").grid(column=0,row=row,sticky=E)
+    config["ncontinuation"] = StringVar()
+    config["ncontinuation"].set("10")
+    Entry(buttonframe,textvariable=config["ncontinuation"]).grid(column=1,row=row,sticky=W)
+
+
+    row += 1
+    Button(buttonframe,text="launch",        command=launch) .grid(column=2, row=row, sticky=W, padx=5,pady=20)
+    Button(buttonframe,text="abort",         command=abort)  .grid(column=3, row=row, sticky=W, padx=5,pady=20)
+    
+    
     row+=1
     report = ScrolledText(master)
     report.pack(padx=10,pady=10,fill=BOTH,expand=True)
