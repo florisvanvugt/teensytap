@@ -11,8 +11,8 @@ readme.html: readme.md misc/github-pandoc.css
 
 
 
-upload: teensy_tap.ino
-	arduino --upload teensy_tap.ino
+upload: teensytap/teensytap.ino
+	arduino --upload teensytap/teensytap.ino
 
 
 serial:

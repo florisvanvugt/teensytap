@@ -20,9 +20,19 @@
 
  */
 
+#include <Audio.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
+#include <Bounce.h>
 
+#include "AudioSampleTap.h" 
 
-int fsrAnalogPin = 0; // FSR is connected to analog 0
+/*
+  Setting up infrastructure for capturing taps (from a connected FSR)
+*/
+
+int fsrAnalogPin = 3; // FSR is connected to analog 3 (A3)
 int fsrReading;      // the analog reading from the FSR resistor divider
 
 // For interpreting taps
@@ -57,12 +67,61 @@ int missed_frames = 0; // ideally our script should read the FSR every milliseco
 
 
 
+
+/*
+  Setting up the audio
+*/
+
+float sound_volume = .5; // the volume
+
+// Create the Audio components.
+// We create two sound memories so that we can play two sounds simultaneously
+AudioPlayMemory    sound0;
+AudioPlayMemory    sound1;  // six memory players, so we can play
+AudioMixer4        mix1;   // one four-channel mixer (we'll only use two channels)
+AudioOutputI2S     headphones;
+AudioOutputAnalog  dac;     // play to both I2S audio board and on-chip DAC --- FVV TODO Probably I don't need this
+
+// Create Audio connections between the components
+//
+AudioConnection c1(sound0, 0, mix1, 0);
+AudioConnection c2(sound1, 0, mix1, 1);
+AudioConnection c8(mix1, 0, headphones, 0);
+//AudioConnection c10(mix2, 0, dac, 0); // FVV TODO Probably I don't need this
+
+// Create an object to control the audio shield.
+AudioControlSGTL5000 audioShield;
+
+
+
+
+
 void setup(void) {
   /* This function will be executed once when we power up the Teensy */
   
   Serial.begin(baudrate);  // Initiate serial communication
-  Serial.println("TeensyTap starting...");
+  Serial.print("TeensyTap starting...\n");
 
+
+  // Audio connections require memory to work.  For more
+  // detailed information, see the MemoryAndCpuUsage example
+  AudioMemory(10);
+
+  // turn on the output
+  audioShield.enable();
+  audioShield.volume(sound_volume);
+
+  // by default the Teensy 3.1 DAC uses 3.3Vp-p output
+  // if your 3.3V power has noise, switching to the
+  // internal 1.2V reference can give you a clean signal
+  dac.analogReference(INTERNAL);
+
+  // reduce the gain on mixer channels, so more than 1
+  // sound can play simultaneously without clipping
+  mix1.gain(0, 0.5);
+  mix1.gain(1, 0.5);
+
+  Serial.print("TeensyTap ready.\n");
 }
 
 
@@ -113,7 +172,9 @@ void loop(void) {
 	tap_number += 1; // new tap!
 	tap_onset_t = current_t;
 	// don't allow an offset immediately; freeze the phase for a little while
-	next_event_embargo_t = current_t + min_tap_on_duration; 
+	next_event_embargo_t = current_t + min_tap_on_duration;
+
+	sound0.play(AudioSampleTap);
       }
       
     } else if (tap_phase==1) {

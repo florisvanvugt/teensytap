@@ -113,6 +113,8 @@ https://learn.adafruit.com/force-sensitive-resistor-fsr/using-an-fsr
 
 https://www.pjrc.com/store/teensy3_audio.html
 
+There are connectors on a number of pins:
+
 
 
 
@@ -120,6 +122,15 @@ https://www.pjrc.com/store/teensy3_audio.html
 # Python GUI
 
 Requirements: `pyserial` (`pip install pyserial`).
+
+
+
+
+# Soldering
+
+* Lead-based: 650 F (easier).
+* Non-lead-based: 750 F
+
 
 
 
@@ -142,6 +153,26 @@ I am also wondering whether sounds should be played from the SD card or otherwis
 Had trouble getting sound output. I think the issue is the Teensy is simply not interfacing with the audio board at all. This may be because I had not soldered it. This seems a good explanation of the soldering [here](https://www.youtube.com/watch?v=37mW1i_oEpA).
 
 
+
+## 1 Oct 2017
+
+Soldering Teensy & Audio board together. Checking for short circuits suggests all is well except perhaps the 3.3V pin making contact with the adjacent Teensy pin 23?
+
+Success! Now the SamplePlayer sketch actually works! Yippie.
+
+By the way, I like this wav2sketch thing that allows you to convert a wav file into a C-header that you can compile directly into your program (no need for SD). It just sounds like that can be a faster way.
+
+
+
+## 2 Oct 2017
+
+Also soldered connectors for the FSR on to the Teensy. I had to move from A0 for reading the FSR voltage to A3 because A0 was in use. First I didn't get a good reading (just oscillating values), which was fixed when I resoldered the connector.
+
+
+
+
+
+
 # TODO
 
 - [ ] Deal with timer overflows (can we set the timer to zero manually?)
@@ -150,5 +181,7 @@ Had trouble getting sound output. I think the issue is the Teensy is simply not 
 - [ ] Auditory feedback
 - [ ] Delayed auditory feedback
 - [ ] Metronome
+- [ ] Check that the tap timings actually make sense; perhaps plot them; do we get lots of minimal tap/inter-tap-durations?
+
 
 
