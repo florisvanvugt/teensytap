@@ -21,6 +21,7 @@ import time
 from tkinter import messagebox
 from tkinter.scrolledtext import ScrolledText
 import struct
+import os
 
 
 def error_message(msg):
@@ -72,7 +73,7 @@ def output(msg):
     global config
 
     fmt = time.strftime('[%Y-%m-%d %H:%M:%S] ')
-    msg = fmt + msg
+    msg = fmt + msg + "\n"
     config["report"].insert(END,msg)
     config["report"].see(END) #scroll down to the end
     print(msg)
@@ -88,10 +89,13 @@ def listen():
         ln = config["comm"].readline()
         if ln!=None and len(ln)>0:
             # Probably an incoming tap
-            msg= ln.decode('ascii')
+            msg= ln.decode('ascii').strip()
             output(msg)
-    
 
+            # Output to file if we have a output filename
+            if "out.filename" in config:
+                with open(config["out.filename"],'a') as f:
+                    f.write(msg+"\n")
 
 
 
@@ -156,8 +160,17 @@ def launch():
     time.sleep(1) # Just wait a moment to allow Teensy to process
     
 
+    # Create the output file
+    subjectid = config["subj"].get().strip()
+    outdir = os.path.join('data',subjectid)
+    if not os.path.exists(outdir): 
+        os.makedirs(outdir)
+    outf = os.path.join(outdir,"%s%s.txt"%(subjectid,time.strftime("%Y%m%d_%H%M%S")))
+    config["out.filename"]=outf
+    output("Output to %s"%config["out.filename"])
 
 
+    
 def go():
     # Okay, when it has swallowed all this, now we can make it start!
     config["comm"].write(struct.pack('!B',MESSAGE_START))
@@ -189,6 +202,7 @@ def build_gui():
     buttonframe = Frame(master) #,padding="3 3 12 12")
 
     buttonframe.pack(padx=10,pady=10)
+
     row = 0
     openb = Button(buttonframe,text="open",        command=openserial) .grid(column=2, row=row, sticky=W)
     commport = StringVar()
@@ -197,6 +211,14 @@ def build_gui():
     ttydev  = Entry(buttonframe,textvariable=commport).grid(column=1,row=row,sticky=W)
     config["commport"]=commport
 
+    row += 1 
+    subj = StringVar()
+    subj.set("subject") 
+    Label(buttonframe, text="subject ID").grid(column=0,row=row,sticky=W)
+    subjentry = Entry(buttonframe,textvariable=subj).grid(column=1,row=row,sticky=W)
+    config["subj"]=subj
+
+    
     row += 1
     config["auditoryfb"] = IntVar()
     c = Checkbutton(buttonframe, text="Auditory feedback", variable=config["auditoryfb"])
@@ -238,7 +260,7 @@ def build_gui():
 
 
     row += 1
-    Button(buttonframe,text="launch",        command=launch) .grid(column=2, row=row, sticky=W, padx=5,pady=20)
+    Button(buttonframe,text="configure",     command=launch) .grid(column=2, row=row, sticky=W, padx=5,pady=20)
     Button(buttonframe,text="go",            command=go)     .grid(column=3, row=row, sticky=W, padx=5,pady=20)
     Button(buttonframe,text="abort",         command=abort)  .grid(column=4, row=row, sticky=W, padx=5,pady=20)
     

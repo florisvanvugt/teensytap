@@ -305,7 +305,7 @@ void loop(void) {
   if (Serial.available()) {
     int inByte = Serial.read();
 
-    Serial.print(inByte);
+    //Serial.print(inByte);
     if (inByte==MESSAGE_CONFIG) { // We are going to receive config information from the PC
       read_config_from_serial();
     }
@@ -372,7 +372,8 @@ void send_config_to_serial() {
 
   char msg[200];
   msg_number += 1; // This is the next message
-  sprintf(msg, "config %i %i %i %i %i %i\n",
+  sprintf(msg, "%d config AF=%i DELAY=%i METR=%i INTVL=%i NCLICK=%i NCONT=%i\n",
+	  msg_number,
 	  auditory_feedback,
 	  auditory_feedback_delay,
 	  metronome,
