@@ -187,13 +187,13 @@ Now trying to figure out a way in which the PC can send instructions for a parti
 - [x] Communicate metronome times to computer
 - [x] Metronome
 - [x] Auditory feedback
-- [ ] Delayed auditory feedback
+- [x] Delayed auditory feedback
 - [ ] Check that the tap timings actually make sense; perhaps plot them; do we get lots of minimal tap/inter-tap-durations?
 - [ ] Make sure participants cannot see the LED, because it blinks in relation to the amount of sound output!
 - [ ] Currently sound is mono, so it will sound in the left ear only for a stereo plug. Use mono2stereo plug?
 - [x] Apply communication settings
 - [ ] Implement # of metronome clicks (and continuation)
-- [ ] Save data to file
+- [x] Save data to file
 - [ ] Enforce logic in GUI, by disabling and enabling buttons depending on the status
-
+- [ ] Replace the snare drum file because I don't have the copyright?
 
