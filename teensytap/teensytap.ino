@@ -34,7 +34,7 @@
 */
 
 int active = 0; // Whether the tap capturing & metronome and all is currently active
-
+int prev_active = 0; // Whether we were active on the previous loop iteration
 
 int fsrAnalogPin = 3; // FSR is connected to analog 3 (A3)
 int fsrReading;      // the analog reading from the FSR resistor divider
@@ -177,7 +177,7 @@ void do_activity() {
     // Main loop tick (one ms has passed)
     
     
-    if (current_t-prev_t > 1) {
+    if ((prev_active) && (current_t-prev_t > 1)) {
       // We missed a frame (or more)
       missed_frames += (current_t-prev_t);
     }
@@ -283,7 +283,7 @@ void do_activity() {
 
     }
     
-    // Update the loop time
+    // Update the "previous" state of variables
     prev_t = current_t;
   }
 
@@ -298,6 +298,10 @@ void loop(void) {
   current_t = millis(); // get current time (in ms)
 
   if (active) { do_activity(); }
+  // Signal for the next loop iteration whether we were active previously.
+  // For example, if we weren't active previously then we don't want to count lost frames.
+  prev_active = active;
+  
 
   /* 
      Read the serial port, see if some message is available for us.
@@ -310,14 +314,21 @@ void loop(void) {
       read_config_from_serial();
     }
     if (inByte==MESSAGE_START) {  // Switch to active mode
+      Serial.print("# Start signal received...\n");
       active = 1;
+
+      /* Okay, if we are playing a metronome then let's determine when to start. */
+      if (metronome) {
+	next_metronome_t = current_t + metronome_interval;
+      }
     }
     if (inByte==MESSAGE_STOP) {   // Switch to inactive mode
+      Serial.print("# Stop signal received...\n");
       active = 0;
     }
     
   }
-  
+
 }
 
 
@@ -345,12 +356,12 @@ void read_config_from_serial() {
      This function runs when we are about to receive configuration
      instructions from the PC.
   */
-  Serial.print("Receiving configuration...\n");
+  Serial.print("# Receiving configuration...\n");
 
   while (!(Serial.available()>=CONFIG_LENGTH)) {
     // Wait until we have enough info
   }
-  Serial.print("... starting to read...\n");
+  Serial.print("# ... starting to read...\n");
   
   auditory_feedback       = readint();
   auditory_feedback_delay = readint();
@@ -359,8 +370,9 @@ void read_config_from_serial() {
   metronome_nclicks       = readint();
   ncontinuation_clicks    = readint();
 
-  Serial.print("Config received...\n");
+  Serial.print("# Config received...\n");
   send_config_to_serial();
+  missed_frames = 0;
   
 }
 
@@ -371,9 +383,8 @@ void send_config_to_serial() {
   /* Sends a dump of the current config to the serial. */
 
   char msg[200];
-  msg_number += 1; // This is the next message
-  sprintf(msg, "%d config AF=%i DELAY=%i METR=%i INTVL=%i NCLICK=%i NCONT=%i\n",
-	  msg_number,
+  //msg_number += 1; // This is the next message
+  sprintf(msg, "# config AF=%i DELAY=%i METR=%i INTVL=%i NCLICK=%i NCONT=%i\n",
 	  auditory_feedback,
 	  auditory_feedback_delay,
 	  metronome,

@@ -73,8 +73,8 @@ def output(msg):
     global config
 
     fmt = time.strftime('[%Y-%m-%d %H:%M:%S] ')
-    msg = fmt + msg + "\n"
-    config["report"].insert(END,msg)
+    msg = fmt + msg
+    config["report"].insert(END,msg+"\n")
     config["report"].see(END) #scroll down to the end
     print(msg)
     
@@ -165,7 +165,7 @@ def launch():
     outdir = os.path.join('data',subjectid)
     if not os.path.exists(outdir): 
         os.makedirs(outdir)
-    outf = os.path.join(outdir,"%s%s.txt"%(subjectid,time.strftime("%Y%m%d_%H%M%S")))
+    outf = os.path.join(outdir,"%s_%s.txt"%(subjectid,time.strftime("%Y%m%d_%H%M%S")))
     config["out.filename"]=outf
     output("Output to %s"%config["out.filename"])
 
