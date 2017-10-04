@@ -56,8 +56,9 @@ def openserial():
 
     config["comm"]=comm
     config["capturing"]=True
-    output("Now capturing\n")
+    output("Now listening to serial port %s\n"%port)
     
+    update_enabled()
     
 
 
@@ -92,6 +93,11 @@ def listen():
             msg= ln.decode('ascii').strip()
             output(msg)
 
+            # If the message contains a trial completion signal
+            if msg.find('Trial completed at')>-1:
+                config["running"]=False
+                update_enabled()
+            
             # Output to file if we have a output filename
             if "out.filename" in config:
                 with open(config["out.filename"],'a') as f:
@@ -118,8 +124,14 @@ def check_and_convert_int(key,datadict):
 
 
 
-def launch():
-    # Launch a trial
+def update_enabled():
+    """ Update the state of buttons depending on our state."""
+    config["go.button"]   .configure(state=NORMAL if config["capturing"] else DISABLED)
+    config["abort.button"].configure(state=NORMAL if config["capturing"] and config["running"] else DISABLED)
+
+
+def send_config():
+    """ Communicate the settings for this trial to the Teensy """
 
     # First, let's collect and verify the data
 
@@ -136,8 +148,7 @@ def launch():
     for val in ["auditory.fb.delay","metronome.interval","metronome.nclicks","ncontinuation.clicks"]:
         trialinfo[val] = check_and_convert_int(val,trialinfo)
         if trialinfo[val]==None:
-            return # Conversion failed
-
+            return False # Conversion failed
 
     print(trialinfo)
     
@@ -157,7 +168,7 @@ def launch():
                                      trialinfo["metronome.nclicks"],
                                      trialinfo["ncontinuation.clicks"]))
 
-    time.sleep(1) # Just wait a moment to allow Teensy to process
+    time.sleep(1) # Just wait a moment to allow Teensy to process (not sure if this is actually necessary)
     
 
     # Create the output file
@@ -167,19 +178,33 @@ def launch():
         os.makedirs(outdir)
     outf = os.path.join(outdir,"%s_%s.txt"%(subjectid,time.strftime("%Y%m%d_%H%M%S")))
     config["out.filename"]=outf
+    output("")
     output("Output to %s"%config["out.filename"])
 
-
+    return True
     
+
+
+
+
+
 def go():
-    # Okay, when it has swallowed all this, now we can make it start!
-    config["comm"].write(struct.pack('!B',MESSAGE_START))
+    config["running"]=False
+    update_enabled()
+    if send_config(): # this sends the configuration for the current trial
+    
+        # Okay, when it has swallowed all this, now we can make it start!
+        config["comm"].write(struct.pack('!B',MESSAGE_START))
+        config["running"]=True
+    update_enabled()
 
     
     
     
 def abort():
     config["comm"].write(struct.pack('!B',MESSAGE_STOP))
+    config["running"]=False
+    update_enabled()
     
     
 
@@ -234,7 +259,7 @@ def build_gui():
 
     row += 1
     config["metronome"] = IntVar()
-    c = Checkbutton(buttonframe, text="Metronome", variable=config["metronome"])
+    c = Checkbutton(buttonframe, text="Metronome sound", variable=config["metronome"])
     c.grid(column=0,row=row,sticky=W,padx=5,pady=10)
 
     row += 1
@@ -260,9 +285,19 @@ def build_gui():
 
 
     row += 1
-    Button(buttonframe,text="configure",     command=launch) .grid(column=2, row=row, sticky=W, padx=5,pady=20)
-    Button(buttonframe,text="go",            command=go)     .grid(column=3, row=row, sticky=W, padx=5,pady=20)
-    Button(buttonframe,text="abort",         command=abort)  .grid(column=4, row=row, sticky=W, padx=5,pady=20)
+    #Button(buttonframe,text="configure",     command=launch) .grid(column=2, row=row, sticky=W, padx=5,pady=20)
+    config["go.button"]=Button(buttonframe,
+                               text="go",
+                               command=go,
+                               background="green",
+                               activebackground="white")
+    config["go.button"].grid(column=3, row=row, sticky=W, padx=5,pady=20)
+    config["abort.button"]=Button(buttonframe,
+                                  text="abort",
+                                  command=abort,
+                                  background="red",
+                                  activebackground="darkred")
+    config["abort.button"].grid(column=4, row=row, sticky=W, padx=5,pady=20)
     
     
     row+=1
@@ -277,6 +312,7 @@ def build_gui():
     config["master"]=master
 
 
+    update_enabled()
 
 
 
@@ -285,6 +321,7 @@ def build_gui():
 global config
 config = {}
 config["capturing"]=False
+config["running"]=False
 
 
 

@@ -192,8 +192,8 @@ Now trying to figure out a way in which the PC can send instructions for a parti
 - [ ] Make sure participants cannot see the LED, because it blinks in relation to the amount of sound output!
 - [ ] Currently sound is mono, so it will sound in the left ear only for a stereo plug. Use mono2stereo plug?
 - [x] Apply communication settings
-- [ ] Implement # of metronome clicks (and continuation)
+- [x] Implement # of metronome clicks (and continuation)
 - [x] Save data to file
-- [ ] Enforce logic in GUI, by disabling and enabling buttons depending on the status
+- [x] Enforce logic in GUI, by disabling and enabling buttons depending on the status
 - [ ] Replace the snare drum file because I don't have the copyright?
 

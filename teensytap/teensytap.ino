@@ -33,8 +33,8 @@
   Setting up infrastructure for capturing taps (from a connected FSR)
 */
 
-int active = 0; // Whether the tap capturing & metronome and all is currently active
-int prev_active = 0; // Whether we were active on the previous loop iteration
+boolean active = false; // Whether the tap capturing & metronome and all is currently active
+boolean prev_active = false; // Whether we were active on the previous loop iteration
 
 int fsrAnalogPin = 3; // FSR is connected to analog 3 (A3)
 int fsrReading;      // the analog reading from the FSR resistor divider
@@ -52,6 +52,7 @@ int tap_phase = 0; // The current tap phase, 0 = tap off (i.e. we are in the int
 unsigned long current_t            = 0; // the current time (in ms)
 unsigned long prev_t               = 0; // the time stamp at the previous iteration (used to ensure correct loop time)
 unsigned long next_event_embargo_t = 0; // the time when the next event is allowed to happen
+unsigned long trial_end_t          = 0; // the time that this trial will end
 
 
 unsigned long tap_onset_t = 0;  // the onset time of the current tap
@@ -72,16 +73,21 @@ unsigned long next_metronome_t            = 0; // the time at which we should pl
 unsigned long next_tap_t                  = 0; // the time at which the next tap sound should occur
 
 
+int metronome_clicks_played = 0; // how many metronome clicks we have played (used to keep track and quit)
+
+boolean running_trial = false; // whether we are currently running the trial
+
+
 
 /*
   Information pertaining to the trial we are currently running
 */
 
-int auditory_feedback = 0;       // whether we present a tone at every tap
+int auditory_feedback       = 0; // whether we present a tone at every tap
 int auditory_feedback_delay = 0; // the delay between the tap and the to-be-presented feedback
-int metronome = 0;               // whether to present a metronome sound
-int metronome_nclicks = 0;       // how many clicks of the metronome to present on this trial
-int ncontinuation_clicks = 0;    // how many continuation clicks to present after the metronome stops
+int metronome               = 0; // whether to present a metronome sound
+int metronome_nclicks       = 0; // how many clicks of the metronome to present on this trial
+int ncontinuation_clicks    = 0; // how many continuation clicks to present after the metronome stops
 
 
 
@@ -159,7 +165,7 @@ void setup(void) {
 
   Serial.print("TeensyTap ready.\n");
 
-  active = 0;
+  active = false;
 }
 
 
@@ -198,11 +204,12 @@ void do_activity() {
     if (tap_phase==0) {
       // Currently we are in the tap-off phase (nothing was thouching the FSR)
       
-      // First, check whether actually anything is allowed to happen.
-      // For example, if a tap just happened then we don't allow another event,
-      // for example we don't want taps to occur impossibly close (e.g. within a few milliseconds
-      // we can't realistically have a tap onset and offset).
-      // Second, check whether this a new tap onset
+      /* First, check whether actually anything is allowed to happen.
+	 For example, if a tap just happened then we don't allow another event,
+	 for example we don't want taps to occur impossibly close (e.g. within a few milliseconds
+	 we can't realistically have a tap onset and offset).
+	 Second, check whether this a new tap onset
+      */
       if ( (current_t > next_event_embargo_t) && (fsrReading>tap_onset_threshold)) {
 
 	// New Tap Onset
@@ -253,9 +260,12 @@ void do_activity() {
      * Deal with the metronome
     */
     // Is this a time to play a metronome click?
-    if (metronome) {
+    if (metronome && (metronome_clicks_played < metronome_nclicks)) {
       if (current_t > next_metronome_t) {
-	
+
+	// Mark that we have another click played
+	metronome_clicks_played += 1;
+
 	// Play metronome click
 	sound1.play(AudioSampleMetronome);
 	
@@ -301,30 +311,53 @@ void loop(void) {
   // Signal for the next loop iteration whether we were active previously.
   // For example, if we weren't active previously then we don't want to count lost frames.
   prev_active = active;
-  
 
+
+  if (running_trial && (current_t > trial_end_t)) {
+    // Trial has ended (we have completed the number of metronome clicks and continuation clicks)
+    Serial.print("# Trial completed at t=");
+    Serial.print(current_t);
+    Serial.print("\n");
+    running_trial = false;
+  }
+
+
+  
   /* 
      Read the serial port, see if some message is available for us.
   */
   if (Serial.available()) {
     int inByte = Serial.read();
 
-    //Serial.print(inByte);
     if (inByte==MESSAGE_CONFIG) { // We are going to receive config information from the PC
       read_config_from_serial();
     }
+    
     if (inByte==MESSAGE_START) {  // Switch to active mode
-      Serial.print("# Start signal received...\n");
-      active = 1;
+      Serial.print("# Start signal received at t=");
+      Serial.print(current_t);
+      Serial.print("\n");
+
+      // Compute when this trial will end
+      trial_end_t = current_t;
+      if (metronome)
+	trial_end_t += (metronome_nclicks+1)*metronome_interval; // the +1 here is because from the start moment we will wait one metronome period until we actually start registering
+      trial_end_t   += (ncontinuation_clicks*metronome_interval);
+      
+      active        = true;
+      running_trial = true;
 
       /* Okay, if we are playing a metronome then let's determine when to start. */
       if (metronome) {
 	next_metronome_t = current_t + metronome_interval;
       }
     }
+    
     if (inByte==MESSAGE_STOP) {   // Switch to inactive mode
-      Serial.print("# Stop signal received...\n");
-      active = 0;
+      Serial.print("# Stop signal received at t=");
+      Serial.print(current_t);
+      Serial.print("\n");
+      active = true;
     }
     
   }
@@ -356,6 +389,7 @@ void read_config_from_serial() {
      This function runs when we are about to receive configuration
      instructions from the PC.
   */
+  active = false; // Ensure we are not active while receiving configuration (this can have unpredictable results)
   Serial.print("# Receiving configuration...\n");
 
   while (!(Serial.available()>=CONFIG_LENGTH)) {
@@ -372,7 +406,11 @@ void read_config_from_serial() {
 
   Serial.print("# Config received...\n");
   send_config_to_serial();
-  missed_frames = 0;
+
+  // Reset some of the other configuration parameters
+  missed_frames           = 0;
+  metronome_clicks_played = 0;
+  msg_number              = 0; // start messages from zero again
   
 }
 
