@@ -247,6 +247,7 @@ def build_gui():
     row += 1
     config["auditoryfb"] = IntVar()
     c = Checkbutton(buttonframe, text="Auditory feedback", variable=config["auditoryfb"])
+    config["auditoryfb"].set(1)
     c.grid(column=0,row=row,sticky=W,padx=5,pady=5)
 
     row+=1
@@ -259,6 +260,7 @@ def build_gui():
 
     row += 1
     config["metronome"] = IntVar()
+    config["metronome"].set(1)
     c = Checkbutton(buttonframe, text="Metronome sound", variable=config["metronome"])
     c.grid(column=0,row=row,sticky=W,padx=5,pady=10)
 

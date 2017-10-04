@@ -196,4 +196,7 @@ Now trying to figure out a way in which the PC can send instructions for a parti
 - [x] Save data to file
 - [x] Enforce logic in GUI, by disabling and enabling buttons depending on the status
 - [ ] Replace the snare drum file because I don't have the copyright?
+- [ ] Feedback can occur before tap (new start)
+
+
 

@@ -26,6 +26,7 @@
 // Load the samples that we will play for taps and metronome clicks, respectively
 #include "AudioSampleTap.h"
 #include "AudioSampleMetronome.h"
+#include "AudioSampleEndsignal.h"
 
 
 
@@ -315,9 +316,15 @@ void loop(void) {
 
   if (running_trial && (current_t > trial_end_t)) {
     // Trial has ended (we have completed the number of metronome clicks and continuation clicks)
+
+    // Play another sound to signal to the subject that the trial has ended.
+    sound1.play(AudioSampleEndsignal);
+
+    // Communicate to the computer
     Serial.print("# Trial completed at t=");
     Serial.print(current_t);
     Serial.print("\n");
+    
     running_trial = false;
   }
 
@@ -406,6 +413,7 @@ void read_config_from_serial() {
 
   Serial.print("# Config received...\n");
   send_config_to_serial();
+  send_header();
 
   // Reset some of the other configuration parameters
   missed_frames           = 0;
@@ -436,6 +444,14 @@ void send_config_to_serial() {
 
 
 
+
+
+void send_header() {
+  /* Sends information about the current tap to the PC through the serial interface */
+  Serial.print("message_number type onset_t offset_t max_force_t max_force n_missed_frames\n");
+}  
+
+
 void send_tap_to_serial() {
   /* Sends information about the current tap to the PC through the serial interface */
   char msg[100];
@@ -450,6 +466,8 @@ void send_tap_to_serial() {
   Serial.print(msg);
   
 }
+
+
 
 
 

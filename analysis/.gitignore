@@ -1,0 +1,4 @@
+*.txt
+.ipynb_checkpoints/
+Explore_Tapping_data.ipynb
+*.pdf
