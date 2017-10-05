@@ -262,7 +262,7 @@ void do_activity() {
     */
     // Is this a time to play a metronome click?
     if (metronome && (metronome_clicks_played < metronome_nclicks)) {
-      if (current_t > next_metronome_t) {
+      if (current_t >= next_metronome_t) {
 
 	// Mark that we have another click played
 	metronome_clicks_played += 1;
@@ -280,7 +280,7 @@ void do_activity() {
 
     if (auditory_feedback) {
       
-      if ((next_tap_t != 0) && (current_t > next_tap_t)) {
+      if ((next_tap_t != 0) && (current_t >= next_tap_t)) {
 
 	// Play the auditory feedback (relating to the subject's tap)
 	sound0.play(AudioSampleTap);

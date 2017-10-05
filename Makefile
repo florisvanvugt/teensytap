@@ -1,12 +1,11 @@
 
 default: readme
 
-readme: readme.html
-	xdg-open readme.html
+readme: development.html
+	xdg-open development.html
 
-readme.html: readme.md misc/github-pandoc.css
-	pandoc -f markdown -t html readme.md -s -c misc/github-pandoc.css -o readme.html
-
+development.html: development.md misc/github-pandoc.css
+	pandoc -f markdown -t html development.md -s -c misc/github-pandoc.css -o development.html
 
 
 
@@ -17,7 +16,6 @@ upload: teensytap/teensytap.ino
 
 serial:
 	cat /dev/ttyACM0
-
 
 
 gui:
