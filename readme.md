@@ -24,6 +24,17 @@ The following software is required only once for uploading the code to Teensy. F
 
 ## Usage
 
+### Building the circuit
+Refer to the circuit diagram `wiring.svg` included here.
+
+1. Solder the Teensy and the Audio Board together. You have to solder only the pins marked in the wiring diagram (to save time).
+
+2. Solder the wires to the resistor and FSR as indicated in `wiring.svg`. 
+
+That's it!
+
+
+
 ### Uploading the Teensy code
 You can either open the `teensytap/teensytap.ino` script in the Arduino IDE and then upload it from there (see the Teensyduino documentation for how this works). Or, if you have a good build environment, you can simply run:
 
