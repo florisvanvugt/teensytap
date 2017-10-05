@@ -7,9 +7,10 @@ A framework for running sensorimotor synchronisation experiment. The framework i
 ## Requirements
 
 ### Hardware
-* Teensy 3.2 (may also work with later versions)
-* Audio Adapter for Teensy
+* [Teensy 3.2](https://www.pjrc.com/store/teensy32.html) (may also work with later versions)
+* [Audio Adapter](https://www.pjrc.com/store/teensy3_audio.html) for Teensy
 * FSR sensor (Force-sensitive resistor)
+* A few wires and a resistor
 
 ### Software
 * Python 3
