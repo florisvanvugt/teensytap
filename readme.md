@@ -4,6 +4,8 @@ A framework for running sensorimotor synchronisation experiment. The framework i
 
 [Demonstration video](https://vimeo.com/236833791)
 
+![alt text](misc/setup_photo.jpg "Setup example")
+
 ## Requirements
 
 ### Hardware
