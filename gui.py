@@ -14,12 +14,20 @@ MESSAGE_STOP   = 55
 
 
 
+import sys
 
-from tkinter import *
+if (sys.version_info > (3, 0)): # Python 3
+    from tkinter import *
+    from tkinter import messagebox
+    from tkinter.scrolledtext import ScrolledText
+else: # probably Python 2
+    from Tkinter import *
+    import tkMessageBox as messagebox
+    from ScrolledText imoprt ScrolledText
+
+
+
 import time
-
-from tkinter import messagebox
-from tkinter.scrolledtext import ScrolledText
 import struct
 import os
 
