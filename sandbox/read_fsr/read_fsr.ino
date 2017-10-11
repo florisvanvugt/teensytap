@@ -15,8 +15,9 @@ void setup(void) {
 
 void loop(void) {
   fsrReading = analogRead(fsrAnalogPin);
-  Serial.print("Analog reading = ");
-  Serial.println(fsrReading);
+  //Serial.print("Analog reading = ");
+  Serial.print(fsrReading);
+  Serial.print(" ");
     
-  delay(250);
+  delay(50);
 }

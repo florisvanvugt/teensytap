@@ -177,12 +177,33 @@ Now trying to figure out a way in which the PC can send instructions for a parti
 
 
 
+## 10 Oct 2017
+
+Wondering whether I can use a different resistor, perhaps to get better SNR when measuring taps. Currently the tap signals I get for reasonable tapping are `~100-160`. Since this is from the function `analogRead`, I suppose it is out of `1024` which means we are using only a tenth of the sensor bandwidth.
+
+Given the wiring, I think we have that $U_f / R_f = U_r / R_r$ where $U_f$ are voltages and $R_f$ resistances of the FSR and $U_r,R_r$ idem for the fixed resistor. The reason is that $U=IR$ and $I$ is constant for the two resistors. Furthermore, since the two resistors are in series, we have that $U_tot = U_r + U_f$.
+Given that equation, we want to increase $U_f$, which should mean we should decrease $R_r$. 
+
+However, I seem to be getting a nice signal with a 4.2 kOhm resistor. Anything in that range seems to be doing reasonably well.
+
+
+
+## 11 Oct 2017
+
+Trying to get an estimate of false positive rate. For this purpose I let the device sit without forces being applied and took a lot of samples, which I then analyse in `calibrate.R`. This is for the 4.2 kOhm resistor circuit. It seems that any cutoff value of 13 (arbitrary `analogRead` units) gives astronomically small probabilities for false alarms even if you were to measure for 1 hour continuously at 1 kHz.
+
+
+
+
+
+
+
 
 
 # TODO
 
 - [ ] Deal with timer overflows (can we set the timer to zero manually?)
-- [ ] Fine-tune the resistance so that it yields optimal SNR
+- [x] Fine-tune the resistance so that it yields optimal SNR
 - [x] Communicate tap times to computer
 - [x] Communicate metronome times to computer
 - [x] Metronome
@@ -190,13 +211,13 @@ Now trying to figure out a way in which the PC can send instructions for a parti
 - [x] Delayed auditory feedback
 - [ ] Check that the tap timings actually make sense; perhaps plot them; do we get lots of minimal tap/inter-tap-durations?
 - [ ] Make sure participants cannot see the LED, because it blinks in relation to the amount of sound output!
-- [ ] Currently sound is mono, so it will sound in the left ear only for a stereo plug. Use mono2stereo plug?
+- [ ] Currently sound is mono (?) so it will sound in the left ear only for a stereo plug. Use mono2stereo plug?
 - [x] Apply communication settings
 - [x] Implement # of metronome clicks (and continuation)
 - [x] Save data to file
 - [x] Enforce logic in GUI, by disabling and enabling buttons depending on the status
 - [ ] Replace the snare drum file because I don't have the copyright?
-- [ ] Feedback can occur before tap (new start)
+- [ ] Bug? -- Feedback can occur before tap (new start)
 
 
 
