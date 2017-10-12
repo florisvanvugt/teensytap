@@ -218,7 +218,7 @@ Trying to get an estimate of false positive rate. For this purpose I let the dev
 - [x] Enforce logic in GUI, by disabling and enabling buttons depending on the status
 - [ ] Replace the snare drum file because I don't have the copyright?
 - [ ] Bug? -- Feedback can occur before tap (new start)
-- [ ] For Mac OS, allow device selection /dev/tty.usbmodem*
+- [x] For Mac OS, allow device selection /dev/tty.usbmodem*
 
 
 
