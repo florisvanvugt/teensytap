@@ -1,5 +1,5 @@
 
-default: readme
+default: gui
 
 readme: development.html
 	xdg-open development.html

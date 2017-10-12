@@ -20,13 +20,14 @@ if (sys.version_info > (3, 0)): # Python 3
     from tkinter import *
     from tkinter import messagebox
     from tkinter.scrolledtext import ScrolledText
+    from tkinter import filedialog
 else: # probably Python 2
     from Tkinter import *
     import tkMessageBox as messagebox
-    from ScrolledText imoprt ScrolledText
+    import tkFileDialog as filedialog
+    from ScrolledText import ScrolledText
 
-
-
+import glob
 import time
 import struct
 import os
@@ -58,7 +59,7 @@ def openserial():
     try:
         comm = serial.Serial(port, baudrate, timeout=0.01)
     except:
-        print("Cannot open USB port %s. Is the device connected?\n"%port)
+        error_message("Cannot open USB port %s. Is the device connected?\n"%port)
         config["capturing"]=False
         return False
 
@@ -70,6 +71,37 @@ def openserial():
     
 
 
+
+def browse_serial():
+    # Browse for serial port
+    comm = config["commport"].get()
+    if not os.path.exists(comm):
+        comm = guess_serial()
+
+    file_path_string = filedialog.askopenfilename(initialdir="/dev/",
+                                                  title="Select serial communication port",
+                                                  filetypes=(("tty","tty*"),("all files","*.*")),
+                                                  initialfile=comm)
+    if file_path_string:
+        config["commport"].set(file_path_string)
+    
+
+
+    
+def guess_serial():
+    # Try to automatically find the serial port
+    acm = '/dev/ttyACM0'
+    if os.path.exists(acm):
+        return acm
+
+    candidates = glob.glob('/dev/tty.usb*')
+    if len(candidates)>0:
+        return candidates[0]
+
+    return acm # the default
+    
+
+    
     
 def on_closing():
     global keep_going
@@ -237,9 +269,12 @@ def build_gui():
     buttonframe.pack(padx=10,pady=10)
 
     row = 0
-    openb = Button(buttonframe,text="open",        command=openserial) .grid(column=2, row=row, sticky=W)
+    openb = Button(buttonframe,text="open",        command=openserial)
+    openb.grid(column=2, row=row, sticky=W)
+    browseb = Button(buttonframe,text="browse",    command=browse_serial)
+    browseb.grid(column=3, row=row, sticky=W)
     commport = StringVar()
-    commport.set("/dev/ttyACM0") # default comm port
+    commport.set(guess_serial()) # default comm port
     Label(buttonframe, text="comm port").grid(column=0,row=row,sticky=W)
     ttydev  = Entry(buttonframe,textvariable=commport).grid(column=1,row=row,sticky=W)
     config["commport"]=commport
