@@ -202,7 +202,7 @@ Trying to get an estimate of false positive rate. For this purpose I let the dev
 
 # TODO
 
-- [ ] Deal with timer overflows (can we set the timer to zero manually?)
+- [x] Deal with timer overflows (can we set the timer to zero manually?)
 - [x] Fine-tune the resistance so that it yields optimal SNR
 - [x] Communicate tap times to computer
 - [x] Communicate metronome times to computer
@@ -211,13 +211,13 @@ Trying to get an estimate of false positive rate. For this purpose I let the dev
 - [x] Delayed auditory feedback
 - [ ] Check that the tap timings actually make sense; perhaps plot them; do we get lots of minimal tap/inter-tap-durations?
 - [ ] Make sure participants cannot see the LED, because it blinks in relation to the amount of sound output!
-- [ ] Currently sound is mono (?) so it will sound in the left ear only for a stereo plug. Use mono2stereo plug?
+- [x] Currently sound is mono (?) so it will sound in the left ear only for a stereo plug. Use mono2stereo plug?
 - [x] Apply communication settings
 - [x] Implement # of metronome clicks (and continuation)
 - [x] Save data to file
 - [x] Enforce logic in GUI, by disabling and enabling buttons depending on the status
-- [ ] Replace the snare drum file because I don't have the copyright?
-- [ ] Bug? -- Feedback can occur before tap (new start)
+- [x] Replace the snare drum file because I don't have the copyright?
+- [x] Bug? -- Feedback can occur before tap (new start)
 - [x] For Mac OS, allow device selection /dev/tty.usbmodem*
 
 

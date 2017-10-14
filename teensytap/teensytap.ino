@@ -109,10 +109,10 @@ AudioMixer4        mix1;   // one four-channel mixer (we'll only use two channel
 AudioOutputI2S     headphones;
 
 // Create Audio connections between the components
-//
 AudioConnection c1(sound0, 0, mix1, 0);
 AudioConnection c2(sound1, 0, mix1, 1);
 AudioConnection c3(mix1, 0, headphones, 0);
+AudioConnection c4(mix1, 0, headphones, 1); // We connect mix1 to headphones twice so that the sound goes to both ears
 
 // Create an object to control the audio shield.
 AudioControlSGTL5000 audioShield;
