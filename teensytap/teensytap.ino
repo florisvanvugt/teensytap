@@ -28,6 +28,7 @@
 #include "AudioSampleMetronome.h"
 #include "AudioSampleEndsignal.h"
 
+#include "DeviceID.h"
 
 
 /*
@@ -319,7 +320,7 @@ void loop(void) {
   prev_active = active;
 
 
-  if (running_trial && (current_t > trial_end_t)) {
+  if (active && running_trial && (current_t > trial_end_t)) {
     // Trial has ended (we have completed the number of metronome clicks and continuation clicks)
 
     // Play another sound to signal to the subject that the trial has ended.
@@ -369,7 +370,7 @@ void loop(void) {
       Serial.print("# Stop signal received at t=");
       Serial.print(current_t);
       Serial.print("\n");
-      active = true;
+      active = false; // Put our activity on hold
     }
     
   }
@@ -436,6 +437,8 @@ void send_config_to_serial() {
 
   char msg[200];
   //msg_number += 1; // This is the next message
+  Serial.print  ("# Device installed ");
+  Serial.println(DEVICE_ID);
   sprintf(msg, "# config AF=%i DELAY=%i METR=%i INTVL=%i NCLICK_PREDELAY=%i NCLICK=%i NCONT=%i\n",
 	  auditory_feedback,
 	  auditory_feedback_delay,

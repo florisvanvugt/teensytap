@@ -9,8 +9,14 @@ development.html: development.md misc/github-pandoc.css
 
 
 
+.PHONY: teensytap/DeviceID.h # this ensures DeviceID.h will always be re-made
 
-upload: teensytap/teensytap.ino
+teensytap/DeviceID.h:
+	python -c "import time; print('char DEVICE_ID[] = \"%s\";'%time.strftime('%Y/%m/%d %H:%M:%S'))" > teensytap/DeviceID.h
+#python -c "import datetime; print(datetime.datetime.strftime('%h'))" 
+
+
+upload: teensytap/DeviceID.h teensytap/teensytap.ino
 	arduino --upload teensytap/teensytap.ino
 
 

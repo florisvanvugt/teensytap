@@ -6,3 +6,5 @@ teensy_loader_cli/
 readme.html
 wiring.pdf
 data
+teensytap/DeviceID.h
+development.html
