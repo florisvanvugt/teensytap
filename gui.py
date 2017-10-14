@@ -177,15 +177,16 @@ def send_config():
 
     trialinfo = {}
 
-    trialinfo["auditory.feedback"]   =config["auditoryfb"].get()
-    trialinfo["auditory.fb.delay"]   =config["fbdelay"].get()
-    trialinfo["metronome"]           =config["metronome"].get()
-    trialinfo["metronome.interval"]  =config["metronome_interval"].get()
-    trialinfo["metronome.nclicks"]   =config["nclicks"].get()
-    trialinfo["ncontinuation.clicks"]=config["ncontinuation"].get()
+    trialinfo["auditory.feedback"]           =config["auditoryfb"].get()
+    trialinfo["auditory.fb.delay"]           =config["fbdelay"].get()
+    trialinfo["metronome"]                   =config["metronome"].get()
+    trialinfo["metronome.interval"]          =config["metronome_interval"].get()
+    trialinfo["metronome.nclicks.predelay"]  =config["nclicks_predelay"].get()
+    trialinfo["metronome.nclicks"]           =config["nclicks"].get()
+    trialinfo["ncontinuation.clicks"]        =config["ncontinuation"].get()
 
     # Verify that string data is really an integer
-    for val in ["auditory.fb.delay","metronome.interval","metronome.nclicks","ncontinuation.clicks"]:
+    for val in ["auditory.fb.delay","metronome.interval","metronome.nclicks","ncontinuation.clicks","metronome.nclicks.predelay"]:
         trialinfo[val] = check_and_convert_int(val,trialinfo)
         if trialinfo[val]==None:
             return False # Conversion failed
@@ -200,11 +201,12 @@ def send_config():
     config["comm"].write(struct.pack('!B',MESSAGE_CONFIG))
 
     # Now we tell Teensy that we are going to send some config information
-    config["comm"].write(struct.pack('6i',
+    config["comm"].write(struct.pack('7i',
                                      trialinfo["auditory.feedback"],
                                      trialinfo["auditory.fb.delay"],
                                      trialinfo["metronome"],
                                      trialinfo["metronome.interval"],
+                                     trialinfo["metronome.nclicks.predelay"],
                                      trialinfo["metronome.nclicks"],
                                      trialinfo["ncontinuation.clicks"]))
 
@@ -286,7 +288,7 @@ def build_gui():
     subjentry = Entry(buttonframe,textvariable=subj).grid(column=1,row=row,sticky=W)
     config["subj"]=subj
 
-    
+
     row += 1
     config["auditoryfb"] = IntVar()
     c = Checkbutton(buttonframe, text="Auditory feedback", variable=config["auditoryfb"])
@@ -315,17 +317,26 @@ def build_gui():
     Label(buttonframe, text="ms").grid(column=2,row=row,sticky=W)
 
 
+
+    row += 1
+    Label(buttonframe, text="# clicks before delay onset").grid(column=0,row=row,sticky=E)
+    config["nclicks_predelay"] = StringVar()
+    config["nclicks_predelay"].set("10")
+    Entry(buttonframe,textvariable=config["nclicks_predelay"]).grid(column=1,row=row,sticky=W)
+
+
+    
     row += 1
     Label(buttonframe, text="# clicks").grid(column=0,row=row,sticky=E)
     config["nclicks"] = StringVar()
-    config["nclicks"].set("10")
+    config["nclicks"].set("20")
     Entry(buttonframe,textvariable=config["nclicks"]).grid(column=1,row=row,sticky=W)
 
 
     row += 1
     Label(buttonframe, text="# continuation clicks").grid(column=0,row=row,sticky=E)
     config["ncontinuation"] = StringVar()
-    config["ncontinuation"].set("10")
+    config["ncontinuation"].set("20")
     Entry(buttonframe,textvariable=config["ncontinuation"]).grid(column=1,row=row,sticky=W)
 
 
@@ -335,7 +346,7 @@ def build_gui():
                                text="go",
                                command=go,
                                background="green",
-                               activebackground="white")
+                               activebackground="lightgreen")
     config["go.button"].grid(column=3, row=row, sticky=W, padx=5,pady=20)
     config["abort.button"]=Button(buttonframe,
                                   text="abort",

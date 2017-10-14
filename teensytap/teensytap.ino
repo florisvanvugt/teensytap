@@ -71,7 +71,7 @@ int missed_frames = 0; // ideally our script should read the FSR every milliseco
 int metronome_interval = 600; // Time between metronome clicks
 
 unsigned long next_metronome_t            = 0; // the time at which we should play the next metronome beat
-unsigned long next_tap_t                  = 0; // the time at which the next tap sound should occur
+unsigned long next_feedback_t             = 0; // the time at which the next tap sound should occur
 
 
 int metronome_clicks_played = 0; // how many metronome clicks we have played (used to keep track and quit)
@@ -84,11 +84,12 @@ boolean running_trial = false; // whether we are currently running the trial
   Information pertaining to the trial we are currently running
 */
 
-int auditory_feedback       = 0; // whether we present a tone at every tap
-int auditory_feedback_delay = 0; // the delay between the tap and the to-be-presented feedback
-int metronome               = 0; // whether to present a metronome sound
-int metronome_nclicks       = 0; // how many clicks of the metronome to present on this trial
-int ncontinuation_clicks    = 0; // how many continuation clicks to present after the metronome stops
+int auditory_feedback          = 0; // whether we present a tone at every tap
+int auditory_feedback_delay    = 0; // the delay between the tap and the to-be-presented feedback
+int metronome                  = 0; // whether to present a metronome sound
+int metronome_nclicks_predelay = 0; // how many clicks of the metronome to occur before we switch on the delay (if any)
+int metronome_nclicks          = 0; // how many clicks of the metronome to present on this trial
+int ncontinuation_clicks       = 0; // how many continuation clicks to present after the metronome stops
 
 
 
@@ -220,7 +221,11 @@ void do_activity() {
 	next_event_embargo_t = current_t + min_tap_on_duration;
 
 	// Schedule the next tap feedback time (if we deliver feedback)
-	next_tap_t = current_t + auditory_feedback_delay;
+	if (metronome && metronome_clicks_played < metronome_nclicks_predelay) {
+	  next_feedback_t = current_t; // if we are in the pre-delay period, let's play the feedback sound immediately.
+	} else {
+	  next_feedback_t = current_t + auditory_feedback_delay;
+	}
       }
       
     } else if (tap_phase==1) {
@@ -261,7 +266,7 @@ void do_activity() {
      * Deal with the metronome
     */
     // Is this a time to play a metronome click?
-    if (metronome && (metronome_clicks_played < metronome_nclicks)) {
+    if (metronome && (metronome_clicks_played < metronome_nclicks_predelay + metronome_nclicks)) {
       if (current_t >= next_metronome_t) {
 
 	// Mark that we have another click played
@@ -280,13 +285,13 @@ void do_activity() {
 
     if (auditory_feedback) {
       
-      if ((next_tap_t != 0) && (current_t >= next_tap_t)) {
+      if ((next_feedback_t != 0) && (current_t >= next_feedback_t)) {
 
 	// Play the auditory feedback (relating to the subject's tap)
 	sound0.play(AudioSampleTap);
 
 	// Clear the queue, nothing more to play
-	next_tap_t = 0;
+	next_feedback_t = 0;
 	
 	// Proudly tell the world that we have played the tap sound
 	send_feedback_to_serial();
@@ -404,12 +409,13 @@ void read_config_from_serial() {
   }
   Serial.print("# ... starting to read...\n");
   
-  auditory_feedback       = readint();
-  auditory_feedback_delay = readint();
-  metronome               = readint();
-  metronome_interval      = readint();
-  metronome_nclicks       = readint();
-  ncontinuation_clicks    = readint();
+  auditory_feedback          = readint();
+  auditory_feedback_delay    = readint();
+  metronome                  = readint();
+  metronome_interval         = readint();
+  metronome_nclicks_predelay = readint();
+  metronome_nclicks          = readint();
+  ncontinuation_clicks       = readint();
 
   Serial.print("# Config received...\n");
   send_config_to_serial();
@@ -430,11 +436,12 @@ void send_config_to_serial() {
 
   char msg[200];
   //msg_number += 1; // This is the next message
-  sprintf(msg, "# config AF=%i DELAY=%i METR=%i INTVL=%i NCLICK=%i NCONT=%i\n",
+  sprintf(msg, "# config AF=%i DELAY=%i METR=%i INTVL=%i NCLICK_PREDELAY=%i NCLICK=%i NCONT=%i\n",
 	  auditory_feedback,
 	  auditory_feedback_delay,
 	  metronome,
 	  metronome_interval,
+	  metronome_nclicks_predelay,
 	  metronome_nclicks,
 	  ncontinuation_clicks);
   Serial.print(msg);

@@ -219,6 +219,6 @@ Trying to get an estimate of false positive rate. For this purpose I let the dev
 - [x] Replace the snare drum file because I don't have the copyright?
 - [x] Bug? -- Feedback can occur before tap (new start)
 - [x] For Mac OS, allow device selection /dev/tty.usbmodem*
-
+- [ ] Make a device ID (probably just hard-coded)
 
 
