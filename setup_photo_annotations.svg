@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="423.33334mm"
+   height="340.07779mm"
+   viewBox="0 0 1500 1205"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="setup_photo_annotations.svg"
+   inkscape:export-filename="/home/floris/misc/tapping_teensy/misc/setup_photo_annotations.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="276.50549"
+     inkscape:cy="783.98501"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer2"
+     showgrid="false"
+     inkscape:window-width="1292"
+     inkscape:window-height="883"
+     inkscape:window-x="580"
+     inkscape:window-y="58"
+     inkscape:window-maximized="0"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     sodipodi:insensitive="true"
+     style="display:inline"
+     transform="translate(281.28922,47.132851)">
+    <image
+       sodipodi:absref="/home/floris/misc/tapping_teensy/misc/setup_photo.jpg"
+       xlink:href="misc/setup_photo.jpg"
+       y="-47.132851"
+       x="-281.28922"
+       id="image4163"
+       preserveAspectRatio="none"
+       height="1205"
+       width="1500" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Layer 2"
+     transform="translate(281.28922,47.132851)">
+    <g
+       id="g4215">
+      <g
+         style="fill:#ffffff;stroke:#ffffff"
+         id="g4171">
+        <path
+           style="fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:3.5999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 558.61436,882.65658 113.13708,4.04061"
+           id="path4167"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="cc" />
+      </g>
+      <path
+         inkscape:connector-curvature="0"
+         id="path4169"
+         d="m 680.84282,887.70734 -19.69798,-11.61675 -0.50507,18.68782 z"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text4174"
+         y="803.8313"
+         x="345.05634"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:Helvetica;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-size:25px;fill:#ffffff"
+           y="803.8313"
+           x="345.05634"
+           id="tspan4176"
+           sodipodi:role="line">Force sensor </tspan><tspan
+           id="tspan4178"
+           style="font-size:25px;fill:#ffffff"
+           y="835.0813"
+           x="345.05634"
+           sodipodi:role="line">(which participants</tspan><tspan
+           id="tspan4180"
+           style="font-size:25px;fill:#ffffff"
+           y="866.3313"
+           x="345.05634"
+           sodipodi:role="line">tap on with their finger)</tspan></text>
+    </g>
+    <g
+       transform="translate(-637.79919,-680.47915)"
+       id="g4215-2">
+      <g
+         id="g4267"
+         transform="matrix(0.18031423,0.98360906,-0.98360906,0.18031423,1205.3063,186.239)">
+        <g
+           id="g4171-9"
+           style="fill:#ffffff;stroke:#ffffff">
+          <path
+             sodipodi:nodetypes="cc"
+             inkscape:connector-curvature="0"
+             id="path4167-1"
+             d="m 558.61436,882.65658 113.13708,4.04061"
+             style="fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:3.5999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+        </g>
+        <path
+           style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           d="m 680.84282,887.70734 -19.69798,-11.61675 -0.50507,18.68782 z"
+           id="path4169-2"
+           inkscape:connector-curvature="0" />
+      </g>
+      <text
+         sodipodi:linespacing="125%"
+         id="text4174-7"
+         y="853.36218"
+         x="384.36307"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:Helvetica;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           id="tspan4180-3"
+           style="font-size:25px;fill:#ffffff"
+           y="853.36218"
+           x="384.36307"
+           sodipodi:role="line">USB connection</tspan><tspan
+           style="font-size:25px;fill:#ffffff"
+           y="884.61218"
+           x="384.36307"
+           sodipodi:role="line"
+           id="tspan4265">to computer</tspan></text>
+      <g
+         id="g4267-6"
+         transform="matrix(-0.25989974,-0.96563561,0.96563561,-0.25989974,-201.8215,2095.7782)">
+        <g
+           id="g4171-9-0"
+           style="fill:#ffffff;stroke:#ffffff">
+          <path
+             sodipodi:nodetypes="cc"
+             inkscape:connector-curvature="0"
+             id="path4167-1-6"
+             d="m 558.61436,882.65658 113.13708,4.04061"
+             style="fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:3.5999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+        </g>
+        <path
+           style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           d="m 680.84282,887.70734 -19.69798,-11.61675 -0.50507,18.68782 z"
+           id="path4169-2-2"
+           inkscape:connector-curvature="0" />
+      </g>
+      <text
+         sodipodi:linespacing="125%"
+         id="text4174-7-6"
+         y="1361.4528"
+         x="403.07123"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:Helvetica;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-size:25px;fill:#ffffff"
+           y="1361.4528"
+           x="403.07123"
+           sodipodi:role="line"
+           id="tspan4265-8">Audio jack (3.5mm)</tspan><tspan
+           style="font-size:25px;fill:#ffffff"
+           y="1392.7028"
+           x="403.07123"
+           sodipodi:role="line"
+           id="tspan4307">connection to headphones</tspan><tspan
+           style="font-size:25px;fill:#ffffff"
+           y="1423.9528"
+           x="403.07123"
+           sodipodi:role="line"
+           id="tspan4309">or speaker</tspan></text>
+    </g>
+    <g
+       id="g4267-6-7"
+       transform="matrix(-0.25989974,-0.96563561,0.96563561,-0.25989974,-406.89068,1350.937)">
+      <g
+         id="g4171-9-0-9"
+         style="fill:#ffffff;stroke:#ffffff">
+        <path
+           sodipodi:nodetypes="cc"
+           inkscape:connector-curvature="0"
+           id="path4167-1-6-2"
+           d="m 558.61436,882.65658 113.13708,4.04061"
+           style="fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:3.5999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      </g>
+      <path
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 680.84282,887.70734 -19.69798,-11.61675 -0.50507,18.68782 z"
+         id="path4169-2-2-0"
+         inkscape:connector-curvature="0" />
+    </g>
+    <text
+       sodipodi:linespacing="125%"
+       id="text4174-7-6-2"
+       y="612.57086"
+       x="181.83961"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:Helvetica;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-size:25px;fill:#ffffff"
+         y="612.57086"
+         x="181.83961"
+         sodipodi:role="line"
+         id="tspan4309-5">Audio Adapter for Teensy</tspan></text>
+    <g
+       id="g4267-6-7-9"
+       transform="matrix(0.2639122,0.96454671,-0.96454671,0.2639122,909.87925,-596.53802)">
+      <g
+         id="g4171-9-0-9-2"
+         style="fill:#ffffff;stroke:#ffffff">
+        <path
+           sodipodi:nodetypes="cc"
+           inkscape:connector-curvature="0"
+           id="path4167-1-6-2-2"
+           d="m 440.26866,859.70124 231.48278,26.99595"
+           style="fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:3.5999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      </g>
+      <path
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 680.84282,887.70734 -19.69798,-11.61675 -0.50507,18.68782 z"
+         id="path4169-2-2-0-8"
+         inkscape:connector-curvature="0" />
+    </g>
+    <text
+       sodipodi:linespacing="125%"
+       id="text4174-7-6-2-9"
+       y="40.686516"
+       x="132.14363"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:Helvetica;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-size:25px;fill:#ffffff"
+         y="40.686516"
+         x="132.14363"
+         sodipodi:role="line"
+         id="tspan4309-5-7">Teensy 3.2</tspan></text>
+    <g
+       id="g4267-6-7-3"
+       transform="matrix(-0.99934196,-0.03627196,0.03627196,-0.99934196,1096.9525,1250.2974)">
+      <g
+         id="g4171-9-0-9-6"
+         style="fill:#ffffff;stroke:#ffffff">
+        <path
+           sodipodi:nodetypes="cc"
+           inkscape:connector-curvature="0"
+           id="path4167-1-6-2-1"
+           d="m 558.61436,882.65658 113.13708,4.04061"
+           style="fill:#ffffff;fill-rule:evenodd;stroke:#ffffff;stroke-width:3.5999999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      </g>
+      <path
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 680.84282,887.70734 -19.69798,-11.61675 -0.50507,18.68782 z"
+         id="path4169-2-2-0-2"
+         inkscape:connector-curvature="0" />
+    </g>
+    <text
+       sodipodi:linespacing="125%"
+       id="text4174-7-6-2-93"
+       y="335.69458"
+       x="550.81085"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:Helvetica;-inkscape-font-specification:Helvetica;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       xml:space="preserve"><tspan
+         style="font-size:25px;fill:#ffffff"
+         y="335.69458"
+         x="550.81085"
+         sodipodi:role="line"
+         id="tspan4309-5-1">Resistor</tspan></text>
+  </g>
+</svg>

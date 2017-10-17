@@ -4,7 +4,7 @@ A framework for running sensorimotor synchronisation experiment. The framework i
 
 [Demonstration video](https://vimeo.com/236833791)
 
-![alt text](misc/setup_photo.jpg "Setup example")
+![alt text](misc/setup_photo_annotations.png "Setup example")
 
 ## Requirements
 
@@ -17,13 +17,16 @@ A framework for running sensorimotor synchronisation experiment. The framework i
 * Tools: soldering iron and tin
 
 ### Software
-* Python 3
+* Python 3 (also works with Python 2)
 * `pyserial` module (use `pip install pyserial`)
 
 ### Development software
-The following software is required only once for uploading the code to Teensy. From then on you can use it on any computer that fulfills the above software requirements.
-* Arduino IDE
-* Teensyduino extension for Arduino IDE
+The following software is required only once for uploading the code to Teensy.
+From then on you can use it on any computer that fulfills the above software requirements.
+
+* [Arduino IDE](https://www.arduino.cc/en/Main/Software)
+* [Teensyduino extension for Arduino IDE](https://www.pjrc.com/teensy/teensyduino.html). Teensyduino is basically a set of tools that allow you to use the Arduino development environment to make code for your Teensy.
+
 
 
 
