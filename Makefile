@@ -1,7 +1,13 @@
 
 default: gui
 
-readme: development.html
+readme: readme.html
+	xdg-open readme.html
+
+readme.html: readme.md
+	pandoc -f markdown -t html readme.md -s -c misc/github-pandoc.css -o readme.html
+
+doc: development.html
 	xdg-open development.html
 
 development.html: development.md misc/github-pandoc.css
