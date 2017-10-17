@@ -106,15 +106,16 @@ float sound_volume = .5; // the volume
 // Create the Audio components.
 // We create two sound memories so that we can play two sounds simultaneously
 AudioPlayMemory    sound0;
-AudioPlayMemory    sound1;  // six memory players, so we can play
-AudioMixer4        mix1;   // one four-channel mixer (we'll only use two channels)
+AudioPlayMemory    sound1;  
+AudioMixer4        mixL;   // left-channel mixer
+AudioMixer4        mixR;   // right-channel mixer
 AudioOutputI2S     headphones;
 
 // Create Audio connections between the components
-AudioConnection c1(sound0, 0, mix1, 0);
-AudioConnection c2(sound1, 0, mix1, 1);
-AudioConnection c3(mix1, 0, headphones, 0);
-AudioConnection c4(mix1, 0, headphones, 1); // We connect mix1 to headphones twice so that the sound goes to both ears
+AudioConnection c1(sound0, 0, mixL, 0);
+AudioConnection c2(sound1, 0, mixR, 1);
+AudioConnection c3(mixL, 0, headphones, 0);
+AudioConnection c4(mixR, 0, headphones, 1); // We connect mix1 to headphones twice so that the sound goes to both ears
 
 // Create an object to control the audio shield.
 AudioControlSGTL5000 audioShield;
@@ -163,8 +164,8 @@ void setup(void) {
 
   // reduce the gain on mixer channels, so more than 1
   // sound can play simultaneously without clipping
-  mix1.gain(0, 0.5);
-  mix1.gain(1, 0.5);
+  //mixL.gain(0, 0.5);
+  //mixR.gain(1, 0.5);
 
   Serial.print("TeensyTap ready.\n");
 
