@@ -106,7 +106,7 @@ float sound_volume = .5; // the volume
 // Create the Audio components.
 // We create two sound memories so that we can play two sounds simultaneously
 AudioPlayMemory    sound0;
-AudioPlayMemory    sound1;  // six memory players, so we can play
+AudioPlayMemory    sound1;
 AudioMixer4        mix1;   // one four-channel mixer (we'll only use two channels)
 AudioOutputI2S     headphones;
 
