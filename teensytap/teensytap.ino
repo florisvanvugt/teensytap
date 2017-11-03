@@ -360,6 +360,9 @@ void loop(void) {
       active        = true;
       running_trial = true;
 
+      next_feedback_t  = 0; // ensure that nothing is scheduled to happen any time soon
+      next_metronome_t = 0;
+      
       /* Okay, if we are playing a metronome then let's determine when to start. */
       if (metronome) {
 	next_metronome_t = current_t + metronome_interval;

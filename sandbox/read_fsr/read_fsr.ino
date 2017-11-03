@@ -6,7 +6,7 @@
    
    For more information see www.ladyada.net/learn/sensors/fsr.html */
 
-int fsrAnalogPin = 3; // FSR is connected to analog 0
+int fsrAnalogPin = 3; // the pin the FSR is connected to
 int fsrReading;      // the analog reading from the FSR resistor divider
 
 void setup(void) {
@@ -17,7 +17,7 @@ void loop(void) {
   fsrReading = analogRead(fsrAnalogPin);
   //Serial.print("Analog reading = ");
   Serial.print(fsrReading);
-  Serial.print(" ");
+  Serial.print("\n");
     
   delay(50);
 }
