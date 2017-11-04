@@ -15,6 +15,14 @@
   Based on TapArduino
 
 
+  Nov 2017 - Adding functionality for performing the delay 
+  detection. This is not intended for the general audience though.
+  For that reason I choose to separate as much as possible the code
+  that deals with the sensorimotor synchornisation and the code that
+  deals with the delay detection, even though that inevitably is going
+  to lead to not-so-elegant repetition of code.
+
+
   This is code designed to work with Teensyduino
   (i.e. the Arduino IDE software used to generate code you can run on Teensy)
 
@@ -36,6 +44,8 @@
 */
 
 boolean active = false; // Whether the tap capturing & metronome and all is currently active
+int function_mode = 0; // function_mode==1 is the regular sensorimotor synchronisation functionality; function_mode==2 is delay detection.
+
 boolean prev_active = false; // Whether we were active on the previous loop iteration
 
 int fsrAnalogPin = 3; // FSR is connected to analog 3 (A3)
@@ -95,6 +105,21 @@ int ncontinuation_clicks       = 0; // how many continuation clicks to present a
 
 
 
+/*
+  Variables that control the delay detection task
+*/
+int delay1 = 0; // the delay to be presented for the first tap
+int delay2 = 0; // the delay to be presented for the second tap
+
+unsigned long tap1t        = 0; // the time at which the first tap was registered
+unsigned long tap2t        = 0; // the time at which the second tap was registered
+
+unsigned long sound1t      = 0; // the time at which the first sound was played
+unsigned long sound2t      = 0; // the time at which the second sound was played
+
+int current_tap = 0; // the current tap (e.g. current_tap=1 if the subject has tapped once)
+
+
 
 
 /*
@@ -133,12 +158,14 @@ int msg_number = 0; // keep track of how many messages we have sent over the ser
 long baudrate = 9600; // the serial communication baudrate; not sure whether this actually does anything because Teensy documentation suggests that USB communication is always the highest possible.
 
 
-const int MESSAGE_START   = 77;   // Signal to the Teensy to start
-const int MESSAGE_CONFIG  = 88;   // Signal to the Teensy that we are going to send a trial configuration
-const int MESSAGE_STOP    = 55;   // Signal to the Teensy to stop
+const int MESSAGE_START               = 77;   // Signal to the Teensy to start
+const int MESSAGE_CONFIG              = 88;   // Signal to the Teensy that we are going to send a trial configuration
+const int MESSAGE_DELAYDETECT_CONFIG  = 99;   // Signal to the Teensy that we are going to send configuration for a delay detection task
+const int MESSAGE_STOP                = 55;   // Signal to the Teensy to stop whatever it is doing
 
-const int CONFIG_LENGTH = 6*4; /* Defines the length of the configuration packet */
-  
+const int CONFIG_LENGTH               = 7*4; /* Defines the length of the configuration packet */
+const int DELAYDETECT_LENGTH          = 2*4; /* Defines the length of the configuration packet */
+
 
 
 
@@ -170,6 +197,143 @@ void setup(void) {
 
   active = false;
 }
+
+
+
+
+
+
+
+
+
+
+void do_delaydetect_activity() {
+  /* 
+     This is the usual activity loop for when we are performing the delay detection task. 
+     i.e. if we get to this function that means we are in (active) delay-detection mode.
+  */
+
+  /* If this is our first loop ever, initialise the time points at which we should start taking action */
+  if (prev_t == 0)           { prev_t = current_t; } // To prevent seeming "lost frames"
+  
+  if (current_t > prev_t) {
+    // Main loop tick (one ms has passed)
+    
+    
+    if ((prev_active) && (current_t-prev_t > 1)) {
+      // We missed a frame (or more)
+      missed_frames += (current_t-prev_t);
+    }
+    
+    
+    /*
+     * Collect data
+     */
+    fsrReading = analogRead(fsrAnalogPin);
+    
+    
+    
+
+    /*
+     * Process data: has a new tap onset or tap offset occurred?
+     */
+
+    if (tap_phase==0) {
+      // Currently we are in the tap-off phase (nothing was thouching the FSR)
+      
+      /* First, check whether actually anything is allowed to happen.
+	 For example, if a tap just happened then we don't allow another event,
+	 for example we don't want taps to occur impossibly close (e.g. within a few milliseconds
+	 we can't realistically have a tap onset and offset).
+	 Second, check whether this a new tap onset
+      */
+      if ( (current_t > next_event_embargo_t) && (fsrReading>tap_onset_threshold)) {
+
+	// New Tap Onset
+	tap_phase = 1; // currently we are in the tap "ON" phase
+	tap_onset_t = current_t;
+	// don't allow an offset immediately; freeze the phase for a little while
+	next_event_embargo_t = current_t + min_tap_on_duration;
+
+	current_tap += 1;
+
+	// Schedule the next tap feedback time (if we deliver feedback)
+	if (current_tap==1) {
+	  next_feedback_t = current_t + delay1;
+	  tap1t = current_t;
+	}
+
+	if (current_tap==2) {
+	  next_feedback_t = current_t + delay2;
+	  tap2t = current_t;
+	}
+
+      }
+      
+    } else if (tap_phase==1) {
+      // Currently we are in the tap-on phase (the subject was touching the FSR)
+      
+      // Check whether the force we are currently reading is greater than the maximum force; if so, update the maximum
+      if (fsrReading>tap_max_force) {
+	tap_max_force_t = current_t;
+	tap_max_force   = fsrReading;
+      }
+      
+      // Check whether this may be a tap offset
+      if ( (current_t > next_event_embargo_t) && (fsrReading<tap_offset_threshold)) {
+
+	// New Tap Offset
+	
+	tap_phase = 0; // currently we are in the tap "OFF" phase
+	tap_offset_t = current_t;
+	
+	// don't allow an offset immediately; freeze the phase for a little while
+	next_event_embargo_t = current_t + min_tap_off_duration;
+
+	// Clear information about the tap so that we are ready for the next tap to occur
+	tap_onset_t     = 0;
+	tap_offset_t    = 0;
+	tap_max_force   = 0;
+	tap_max_force_t = 0;
+
+      }
+      
+    }
+
+
+
+    // Now deal with matters relating to auditory feedback
+    if ((next_feedback_t != 0) && (current_t >= next_feedback_t)) {
+      
+      // Play the auditory feedback (relating to the subject's tap)
+      sound0.play(AudioSampleTap);
+      
+      // Clear the queue, nothing more to play
+      next_feedback_t = 0;
+
+      if (current_tap==1) sound1t = current_t;
+      if (current_tap==2) sound2t = current_t;
+      
+      if (current_tap==2) {
+	// If this was the second tap, then this is it! End of trial.
+
+	active = false;
+	send_delaydetect_to_serial(); // Communicate what we did to the computer
+	
+      }
+
+    }
+    
+    // Update the "previous" state of variables
+    prev_t = current_t;
+  }
+
+}
+
+
+
+
+
 
 
 
@@ -314,13 +478,18 @@ void loop(void) {
 
   current_t = millis(); // get current time (in ms)
 
-  if (active) { do_activity(); }
+  if (active) {
+    if (function_mode==1)
+      do_activity();
+    if (function_mode==2)
+      do_delaydetect_activity();
+  }
   // Signal for the next loop iteration whether we were active previously.
   // For example, if we weren't active previously then we don't want to count lost frames.
   prev_active = active;
 
 
-  if (active && running_trial && (current_t > trial_end_t)) {
+  if (active && function_mode==1 && running_trial && (current_t > trial_end_t)) {
     // Trial has ended (we have completed the number of metronome clicks and continuation clicks)
 
     // Play another sound to signal to the subject that the trial has ended.
@@ -345,28 +514,47 @@ void loop(void) {
     if (inByte==MESSAGE_CONFIG) { // We are going to receive config information from the PC
       read_config_from_serial();
     }
+
+    if (inByte==MESSAGE_DELAYDETECT_CONFIG) { // We are going to receive config information from the PC
+      read_delaydetect_config_from_serial();
+    }
+
     
     if (inByte==MESSAGE_START) {  // Switch to active mode
       Serial.print("# Start signal received at t=");
       Serial.print(current_t);
       Serial.print("\n");
 
-      // Compute when this trial will end
-      trial_end_t = current_t;
-      if (metronome)
-	trial_end_t += (metronome_nclicks+1)*metronome_interval; // the +1 here is because from the start moment we will wait one metronome period until we actually start registering
-      trial_end_t   += (ncontinuation_clicks*metronome_interval);
+      if (function_mode==1) {
       
-      active        = true;
-      running_trial = true;
-
-      next_feedback_t  = 0; // ensure that nothing is scheduled to happen any time soon
-      next_metronome_t = 0;
-      
-      /* Okay, if we are playing a metronome then let's determine when to start. */
-      if (metronome) {
-	next_metronome_t = current_t + metronome_interval;
+	// Compute when this trial will end
+	trial_end_t = current_t;
+	if (metronome)
+	  trial_end_t += (metronome_nclicks+1)*metronome_interval; // the +1 here is because from the start moment we will wait one metronome period until we actually start registering
+	trial_end_t   += (ncontinuation_clicks*metronome_interval);
+	
+	active        = true;
+	running_trial = true;
+	
+	next_feedback_t  = 0; // ensure that nothing is scheduled to happen any time soon
+	next_metronome_t = 0;
+	tap_phase        = 0;
+	
+	/* Okay, if we are playing a metronome then let's determine when to start. */
+	if (metronome) {
+	  next_metronome_t = current_t + metronome_interval;
+	}
       }
+
+      if (function_mode==2) {
+
+	active           = true;
+	running_trial    = true;
+	next_feedback_t  = 0; // ensure that nothing is scheduled to happen any time soon
+	tap_phase        = 0;
+
+      }
+      
     }
     
     if (inByte==MESSAGE_STOP) {   // Switch to inactive mode
@@ -429,8 +617,67 @@ void read_config_from_serial() {
   missed_frames           = 0;
   metronome_clicks_played = 0;
   msg_number              = 0; // start messages from zero again
+  function_mode           = 1; // switch to sensorimotor synchronisation mode
   
 }
+
+
+
+
+void read_delaydetect_config_from_serial() {
+  /* 
+     This function runs when we are about to receive configuration
+     instructions from the PC.
+  */
+  active = false; // Ensure we are not active while receiving configuration (this can have unpredictable results)
+  Serial.print("# Receiving delay detection configuration...\n");
+
+  while (!(Serial.available()>=DELAYDETECT_LENGTH)) {
+    // Wait until we have enough info
+  }
+  Serial.print("# ... starting to read...\n");
+
+  delay1 = readint();
+  delay2 = readint();
+
+  Serial.print("# Config received...\n");
+  
+  tap1t        = 0;
+  tap2t        = 0;
+  sound1t      = 0;
+  sound2t      = 0;
+  current_tap  = 0;
+
+  auditory_feedback          = 1;
+  auditory_feedback_delay    = 0;
+  metronome                  = 0;
+  metronome_interval         = 0;
+  metronome_nclicks_predelay = 0;
+  metronome_nclicks          = 0;
+  ncontinuation_clicks       = 0;
+
+  function_mode              = 2; // switch to delay detection mode
+  
+  // Reset some of the other configuration parameters
+  missed_frames           = 0;
+  msg_number              = 0; // start messages from zero again
+  
+}
+
+
+
+
+
+
+void send_delaydetect_to_serial() {
+  /* Sends a report of the current trial to the computer */
+  char msg[200];
+  //msg_number += 1; // This is the next message
+  sprintf(msg, "TAP1T=%lu SOUND1T=%lu TAP2T=%lu SOUND2T=%lu\n"
+	  ,       tap1t,     sound1t,    tap2t,     sound2t);
+  Serial.print(msg);
+}
+
 
 
 

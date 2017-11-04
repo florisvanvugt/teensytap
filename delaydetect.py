@@ -9,14 +9,14 @@ serial_timeout = .01 # the timeout (in seconds) for port reading
 
 # Define the communication protocol with the Teensy (needs to match the corresponding variables in Teensy)
 MESSAGE_CONFIG             = 88 # not actually used -- for the tapping
-MESSAGE_DELAYDETECT_CONFIG = 66
+MESSAGE_DELAYDETECT_CONFIG = 99
 MESSAGE_START              = 77
 MESSAGE_STOP               = 55
 
 
 
 # The delays to be presented (in ms)
-DELAYS = [ 0, 25, 50, 75, 100, 125, 150, 175, 200 ]
+DELAYS = [ 25, 50, 75, 100, 125, 150, 175, 200 ]
 
 # How often each delay is presented
 N_REPETITIONS = 10
@@ -41,6 +41,7 @@ import time
 import struct
 import os
 import random
+import re
 
 
 
@@ -183,6 +184,7 @@ def update_enabled():
     config["firstb"] .configure(state=NORMAL if config["running.block"] else DISABLED)
     config["secondb"].configure(state=NORMAL if config["running.block"] else DISABLED)
     config["singletrb"].configure(state=NORMAL if config["capturing"] else DISABLED)
+    config["resetb"].configure(state=NORMAL if config["running.block"] else DISABLED)
 
 
 
@@ -226,7 +228,7 @@ def start_teensy_trial(delay1,delay2):
 def next_trial():
     """ Present the next trial. """
 
-    config["trial"]+=1
+    #config["trial"]+=1
     config["timestamp"]=time.strftime("%Y%m%d_%H%M%S")
     config["response"]="N/A"
 
@@ -289,14 +291,18 @@ def process_response():
     # Here I need to process the incoming buffer
     config["in.buffer"]
 
-    tap1t,tap2t= -1,-1 # get this from the Teensy output
-    fb1t,fb2t=-1,-1
+    # Now we are looking for something like this in the buffer TAP1T=33992 SOUND1T=33992 TAP2T=34486 SOUND2T=34636
+    res = re.search(r"TAP1T=(\d+)[\s]+SOUND1T=(\d+)[\s]+TAP2T=(\d+)[\s]SOUND2T=(\d+)", config["in.buffer"], flags=0)
+    if not res:
+        error_message("Error!\n\nI did not receive the proper trial report from the Teensy.\n\nDid the subject actually complete the two taps?")
+        return
+    tap1t,fb1t,tap2t,fb2t=res.groups()
     
-    report = "%i %s %i %i %d %d %d %d %s"%(config["trial"],
+    report = "%i %s %i %i %s %s %s %s %s"%(config["trial"],
                                            config["timestamp"],
                                            config["delay1"],
                                            config["delay2"],
-                                           tap1t,
+                                           tap1t,  #-- right, notice that the times come in as strings so why not keep them that way
                                            tap2t,
                                            fb1t,
                                            fb2t,
@@ -307,7 +313,7 @@ def process_response():
         f.write(report+"\n")
 
     output(report)
-        
+    config["trial"]+=1
     next_trial()
     
 
@@ -358,9 +364,9 @@ def start_block():
     output("Output to %s"%config["out.filename"])
 
     
-    config["trial"] = -1
+    config["trial"] = 0
     config["running.block"]=True
-    next_trial()
+    next_trial() # will start the first trial
     
 
     
@@ -468,6 +474,13 @@ def build_gui():
                              command=respond_second)
     config["secondb"].grid(column=1, row=row, sticky=W, padx=5,pady=10)
 
+    row +=1 
+    config["resetb"]=Button(buttonframe,
+                            text="reset trial",
+                            command=next_trial,
+                            background="yellow",
+                            activebackground="white")
+    config["resetb"].grid(column=1, row=row, sticky=W, padx=5,pady=10)
     
     
     row+=1
