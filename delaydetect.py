@@ -40,12 +40,22 @@ import glob
 import time
 import struct
 import os
+import random
+
+
 
 
 def error_message(msg):
     print(msg)
     messagebox.showinfo("Error", msg)
     return
+
+
+def show_message(msg):
+    print(msg)
+    messagebox.showinfo("Message", msg)
+    return
+
 
 
 
@@ -140,18 +150,11 @@ def listen():
         if ln!=None and len(ln)>0:
             # Probably an incoming tap
             msg= ln.decode('ascii').strip()
-            output(msg)
 
-            # If the message contains a trial completion signal
-            if msg.find('Trial completed at')>-1:
-                config["running"]=False
-                update_enabled()
+            # Add this to the incoming buffer
+            config["in.buffer"]+=msg
             
-            # Output to file if we have a output filename
-            if "out.filename" in config:
-                with open(config["out.filename"],'a') as f:
-                    f.write(msg+"\n")
-
+            output(msg)
 
 
             
@@ -177,77 +180,75 @@ def update_enabled():
     """ Update the state of buttons depending on our state."""
     config["go.button"]   .configure(state=NORMAL if config["capturing"] else DISABLED)
     config["abort.button"].configure(state=NORMAL if config["capturing"] and config["running"] else DISABLED)
-
-
-
-
-
-    
-def send_config():
-    """ Communicate the settings for this trial to the Teensy """
-
-    # First, let's collect and verify the data
-
-    trialinfo = {}
-
-    trialinfo["auditory.feedback"]           =config["auditoryfb"].get()
-    trialinfo["auditory.fb.delay"]           =config["fbdelay"].get()
-    trialinfo["metronome"]                   =config["metronome"].get()
-    trialinfo["metronome.interval"]          =config["metronome_interval"].get()
-    trialinfo["metronome.nclicks.predelay"]  =config["nclicks_predelay"].get()
-    trialinfo["metronome.nclicks"]           =config["nclicks"].get()
-    trialinfo["ncontinuation.clicks"]        =config["ncontinuation"].get()
-
-    # Verify that string data is really an integer
-    for val in ["auditory.fb.delay","metronome.interval","metronome.nclicks","ncontinuation.clicks","metronome.nclicks.predelay"]:
-        trialinfo[val] = check_and_convert_int(val,trialinfo)
-        if trialinfo[val]==None:
-            return False # Conversion failed
-
-    print(trialinfo)
-    
-    # Okay, so now we need to talk to Teensy to tell him to start this trial
-
-    # First, tell Teensy to stop whatever it is it is doing at the moment (go to non-active mode)
-    config["comm"].write(struct.pack('!B',MESSAGE_STOP))
-
-    config["comm"].write(struct.pack('!B',MESSAGE_CONFIG))
-
-    # Now we tell Teensy that we are going to send some config information
-    config["comm"].write(struct.pack('7i',
-                                     trialinfo["auditory.feedback"],
-                                     trialinfo["auditory.fb.delay"],
-                                     trialinfo["metronome"],
-                                     trialinfo["metronome.interval"],
-                                     trialinfo["metronome.nclicks.predelay"],
-                                     trialinfo["metronome.nclicks"],
-                                     trialinfo["ncontinuation.clicks"]))
-
-    time.sleep(1) # Just wait a moment to allow Teensy to process (not sure if this is actually necessary)
-    
-
-    # Create the output file
-    subjectid = config["subj"].get().strip()
-    outdir = os.path.join('data',subjectid)
-    if not os.path.exists(outdir): 
-        os.makedirs(outdir)
-    outf = os.path.join(outdir,"%s_%s.txt"%(subjectid,time.strftime("%Y%m%d_%H%M%S")))
-    config["out.filename"]=outf
-    output("")
-    output("Output to %s"%config["out.filename"])
-
-    return True
-    
+    config["firstb"] .configure(state=NORMAL if config["running.block"] else DISABLED)
+    config["secondb"].configure(state=NORMAL if config["running.block"] else DISABLED)
+    config["singletrb"].configure(state=NORMAL if config["capturing"] else DISABLED)
 
 
 
 
 
 
-def run_one_trial(delay1,delay2):
+
+
+def start_teensy_trial(delay1,delay2):
     """ This function runs one delay detection trial.
     delay1 is the delay to be given on the first tap,
     delay2 is, surprise, the delay for the second note."""
+
+    # Communicate this to the Teensy
+
+    # First, tell Teensy to stop whatever it is it is doing at the moment (go to non-active mode)
+    config["comm"].write(struct.pack('!B',MESSAGE_STOP))
+    
+    config["comm"].write(struct.pack('!B',MESSAGE_DELAYDETECT_CONFIG))
+    
+    # Now we tell Teensy that we are going to send some config information
+    config["comm"].write(struct.pack('2i',delay1,delay2))
+                         
+    time.sleep(1) # Just wait a moment to allow Teensy to process (not sure if this is actually necessary)
+
+    # Okay, when it has swallowed all this, now we can make it start!
+    config["comm"].write(struct.pack('!B',MESSAGE_START))
+    config["running"]=True
+    
+    config["in.buffer"]="" # empty the buffer (which should just contain the messages for this trial)
+        
+    update_enabled()
+    return True
+
+
+
+
+def next_trial():
+    """ Present the next trial. """
+
+    config["trial"]+=1
+    config["timestamp"]=time.strftime("%Y%m%d_%H%M%S")
+    config["response"]="N/A"
+
+    if config["trial"]>=len(config["trials"]):
+        config["running.block"]=False
+        config["running"]      =False
+        show_message("Block completed.")
+        
+    
+    # The delay to be tested on this trial
+    delay = config["trials"][config["trial"]]
+
+    delays = [delay,0]
+    random.shuffle(delays)
+
+    start_teensy_trial(delays[0],delays[1])
+
+    
+
+
+def single_trial():
+    """ Run just one trial """
+               
+    config["running"]=False
+    update_enabled()
 
     # Need to communicate this to the Teensy
     # Verify that string data is really an integer
@@ -263,52 +264,66 @@ def run_one_trial(delay1,delay2):
         if trialinfo[val]==None:
             return False # Conversion failed
 
-    # TODO -- communicate this to the Teensy
 
-    # First, tell Teensy to stop whatever it is it is doing at the moment (go to non-active mode)
-    config["comm"].write(struct.pack('!B',MESSAGE_STOP))
-
-    config["comm"].write(struct.pack('!B',MESSAGE_DELAYDETECT_CONFIG))
-
-    # Now we tell Teensy that we are going to send some config information
-    config["comm"].write(struct.pack('2i',
-                                     trialinfo["delay1"],
-                                     trialinfo["delay2"]))
-
-    time.sleep(1) # Just wait a moment to allow Teensy to process (not sure if this is actually necessary)
-
-    return True
+    start_teensy_trial(trialinfo["delay1"],trialinfo["delay2"])
+        
 
 
 
-
-
-def single_trial():
-    config["running"]=False
-    update_enabled()
-    if send_config(): # this sends the configuration for the current trial
+def write_log_header():
+    header = "trial timestamp delay1 delay2 tap1.t tap2.t sound1.t sound2.t response"
+    with open(config["out.filename"],'a') as f:
+        f.write(header+"\n")
     
-        # Okay, when it has swallowed all this, now we can make it start!
-        config["comm"].write(struct.pack('!B',MESSAGE_START))
-        config["running"]=True
-    update_enabled()
+    
 
+def process_reponse():
+    """ The subject has responded something, and now we process the 
+    data we got from Teensy to put into the log file."""
+
+    # Make a little report about this trial
+
+    # Here I need to process the incoming buffer
+    config["in.buffer"]
+
+    tap1t,tap2t= ... # get this from the Teensy output
+    fb1t,fb2t=...
+    
+    report = "%i %s %i %i %d %d %d %d %s\n"%(config["trial"],
+                                             config["timestamp"],
+                                             config["delay1"],
+                                             config["delay2"],
+                                             tap1t,
+                                             tap2t,
+                                             fb1t,
+                                             fb2t,
+                                             config["response"])
+
+    # Output to file if we have a output filename
+    with open(config["out.filename"],'a') as f:
+        f.write(report+"\n")
+
+    output(report)
+        
+    next_trial()
     
 
 
 def respond_first():
     """ Collects the response that the subject said "first" """
-    pass
+    config["response"]="first"
+    process_response()
 
 
 def respond_second():
     """ Collects the response that the subject said "second" """
-    pass
+    config["response"]="second"
+    process_response()
 
     
 
 
-def go():
+def start_block():
     """
     This is when we run a block of trials
     """
@@ -326,14 +341,22 @@ def go():
     config["trials"] = trials
 
 
+    # Create the output file
+    subjectid = config["subj"].get().strip()
+    outdir = os.path.join('data',subjectid)
+    if not os.path.exists(outdir): 
+        os.makedirs(outdir)
+    outf = os.path.join(outdir,"%s_delaydetection_%s.txt"%(subjectid,time.strftime("%Y%m%d_%H%M%S")))
+    config["out.filename"]=outf
+    write_log_header()
+    output("")
+    output("Output to %s"%config["out.filename"])
+
     
+    config["trial"] = -1
+    config["running.block"]=True
+    next_trial()
     
-    if send_config(): # this sends the configuration for the current trial
-    
-        # Okay, when it has swallowed all this, now we can make it start!
-        config["comm"].write(struct.pack('!B',MESSAGE_START))
-        config["running"]=True
-    update_enabled()
 
     
     
@@ -416,7 +439,7 @@ def build_gui():
     #Button(buttonframe,text="configure",     command=launch) .grid(column=2, row=row, sticky=W, padx=5,pady=20)
     config["go.button"]=Button(buttonframe,
                                text="start block",
-                               command=go,
+                               command=start_block,
                                background="green",
                                activebackground="lightgreen")
     config["go.button"].grid(column=3, row=row, sticky=W, padx=5,pady=20)
@@ -431,13 +454,13 @@ def build_gui():
 
 
     config["firstb"]=Button(buttonframe,
-                            text="first tap delayed",
+                            text="respond first tap delayed",
                             command=respond_first)
     config["firstb"].grid(column=1, row=row, sticky=W, padx=5,pady=20)
 
     row+=1
     config["secondb"]=Button(buttonframe,
-                            text="second tap delayed",
+                            text="respond second tap delayed",
                              command=respond_second)
     config["secondb"].grid(column=1, row=row, sticky=W, padx=5,pady=0)
 
@@ -463,10 +486,10 @@ def build_gui():
             
 global config
 config = {}
-config["capturing"]=False
-config["running"]=False
-
-
+config["capturing"]     =False
+config["running"]       =False
+config["running.block"] =False
+config["in.buffer"]     =""
 
 
 
