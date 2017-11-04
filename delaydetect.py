@@ -203,8 +203,6 @@ def start_teensy_trial(delay1,delay2):
     # First, tell Teensy to stop whatever it is it is doing at the moment (go to non-active mode)
     config["comm"].write(struct.pack('!B',MESSAGE_STOP))
 
-    output("Starting trial on Teensy...")
-    
     # Now we tell Teensy that we are going to send some config information
     config["comm"].write(struct.pack('!B',MESSAGE_DELAYDETECT_CONFIG))
     config["comm"].write(struct.pack('2i',delay1,delay2))
@@ -232,6 +230,7 @@ def next_trial():
     config["timestamp"]=time.strftime("%Y%m%d_%H%M%S")
     config["response"]="N/A"
 
+    # If we have completed the block...
     if config["trial"]>=len(config["trials"]):
         config["running.block"]=False
         config["running"]      =False
