@@ -200,17 +200,20 @@ def start_teensy_trial(delay1,delay2):
 
     # First, tell Teensy to stop whatever it is it is doing at the moment (go to non-active mode)
     config["comm"].write(struct.pack('!B',MESSAGE_STOP))
-    
-    config["comm"].write(struct.pack('!B',MESSAGE_DELAYDETECT_CONFIG))
+
+    output("Starting trial on Teensy...")
     
     # Now we tell Teensy that we are going to send some config information
+    config["comm"].write(struct.pack('!B',MESSAGE_DELAYDETECT_CONFIG))
     config["comm"].write(struct.pack('2i',delay1,delay2))
-                         
+    
     time.sleep(1) # Just wait a moment to allow Teensy to process (not sure if this is actually necessary)
 
     # Okay, when it has swallowed all this, now we can make it start!
     config["comm"].write(struct.pack('!B',MESSAGE_START))
-    config["running"]=True
+    config["running"] = True
+    config["delay1"]=delay1
+    config["delay2"]=delay2
     
     config["in.buffer"]="" # empty the buffer (which should just contain the messages for this trial)
         
@@ -256,7 +259,7 @@ def single_trial():
 
     # Grab the info from the text box
     for v in ["delay1","delay2"]:
-        trialinfo[v] = config[v].get()
+        trialinfo[v] = config[v+"var"].get()
 
     # Recode the data as integers
     for val in ["delay1","delay2"]:
@@ -277,7 +280,7 @@ def write_log_header():
     
     
 
-def process_reponse():
+def process_response():
     """ The subject has responded something, and now we process the 
     data we got from Teensy to put into the log file."""
 
@@ -286,18 +289,18 @@ def process_reponse():
     # Here I need to process the incoming buffer
     config["in.buffer"]
 
-    tap1t,tap2t= ... # get this from the Teensy output
-    fb1t,fb2t=...
+    tap1t,tap2t= -1,-1 # get this from the Teensy output
+    fb1t,fb2t=-1,-1
     
-    report = "%i %s %i %i %d %d %d %d %s\n"%(config["trial"],
-                                             config["timestamp"],
-                                             config["delay1"],
-                                             config["delay2"],
-                                             tap1t,
-                                             tap2t,
-                                             fb1t,
-                                             fb2t,
-                                             config["response"])
+    report = "%i %s %i %i %d %d %d %d %s"%(config["trial"],
+                                           config["timestamp"],
+                                           config["delay1"],
+                                           config["delay2"],
+                                           tap1t,
+                                           tap2t,
+                                           fb1t,
+                                           fb2t,
+                                           config["response"])
 
     # Output to file if we have a output filename
     with open(config["out.filename"],'a') as f:
@@ -333,13 +336,15 @@ def start_block():
     ## Prepare the trials to be run
     trials = []
     
-    for _ in N_REPETITIONS:
+    for _ in range(N_REPETITIONS):
         block = DELAYS[:]
         random.shuffle(block)
         trials+=block
         
     config["trials"] = trials
 
+    output("")
+    output("Prepared %i trials"%len(config["trials"]))
 
     # Create the output file
     subjectid = config["subj"].get().strip()
@@ -378,7 +383,7 @@ def build_gui():
     #
 
     # Set up the main interface scree
-    w,h= 800,500
+    w,h= 800,600
     
     master = Tk() #"TeensyTap")
     master.title("Delay Detection")
@@ -409,20 +414,20 @@ def build_gui():
 
 
     row += 1
-    Label(buttonframe, text="Single Trial").grid(column=0,row=row,sticky=E,pady=20)
+    Label(buttonframe, text="Single Trial").grid(column=0,row=row,sticky=E,pady=30)
 
     
     row += 1
     Label(buttonframe, text="delay 1").grid(column=0,row=row,sticky=E,pady=0)
-    config["delay1"] = StringVar()
-    config["delay1"].set("0")
-    Entry(buttonframe,textvariable=config["delay1"]).grid(column=1,row=row,sticky=W)
+    config["delay1var"] = StringVar()
+    config["delay1var"].set("0")
+    Entry(buttonframe,textvariable=config["delay1var"]).grid(column=1,row=row,sticky=W)
 
     row += 1
-    Label(buttonframe, text="delay 1").grid(column=0,row=row,sticky=E)
-    config["delay2"] = StringVar()
-    config["delay2"].set("150")
-    Entry(buttonframe,textvariable=config["delay2"]).grid(column=1,row=row,sticky=W)
+    Label(buttonframe, text="delay 2").grid(column=0,row=row,sticky=E)
+    config["delay2var"] = StringVar()
+    config["delay2var"].set("150")
+    Entry(buttonframe,textvariable=config["delay2var"]).grid(column=1,row=row,sticky=W)
     
     config["singletrb"]=Button(buttonframe,
                                text="single trial",
@@ -433,7 +438,7 @@ def build_gui():
     config["singletrb"].grid(column=3, row=row, sticky=W, padx=5)
 
     row += 1
-    Label(buttonframe, text="Run block").grid(column=0,row=row,sticky=E,pady=20)
+    Label(buttonframe, text="Run block").grid(column=0,row=row,sticky=E,pady=35)
 
     row += 1
     #Button(buttonframe,text="configure",     command=launch) .grid(column=2, row=row, sticky=W, padx=5,pady=20)
@@ -442,27 +447,26 @@ def build_gui():
                                command=start_block,
                                background="green",
                                activebackground="lightgreen")
-    config["go.button"].grid(column=3, row=row, sticky=W, padx=5,pady=20)
+    config["go.button"].grid(column=3, row=row, sticky=W, padx=5)
     config["abort.button"]=Button(buttonframe,
                                   text="abort",
                                   command=abort,
                                   background="red",
                                   activebackground="darkred")
-    config["abort.button"].grid(column=4, row=row, sticky=W, padx=5,pady=20)
+    config["abort.button"].grid(column=4, row=row, sticky=W, padx=5)
     
-
-
+    row +=1
 
     config["firstb"]=Button(buttonframe,
                             text="respond first tap delayed",
                             command=respond_first)
-    config["firstb"].grid(column=1, row=row, sticky=W, padx=5,pady=20)
+    config["firstb"].grid(column=1, row=row, sticky=W, padx=5)
 
     row+=1
     config["secondb"]=Button(buttonframe,
                             text="respond second tap delayed",
                              command=respond_second)
-    config["secondb"].grid(column=1, row=row, sticky=W, padx=5,pady=0)
+    config["secondb"].grid(column=1, row=row, sticky=W, padx=5,pady=10)
 
     
     
