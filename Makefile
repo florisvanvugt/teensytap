@@ -32,3 +32,8 @@ serial:
 
 gui:
 	python3 gui.py
+
+
+delay:
+	python3 delaydetect.py
+
