@@ -117,7 +117,7 @@ int           tap1maxforce  = 0; // the maximum force registered during the firs
 
 unsigned long tap2on        = 0; // the time at which the second tap was registered
 unsigned long tap2off       = 0; // offset time of the second tap
-unsigned long tap2maxforce  = 0; // the maximum force registered during the second tap
+int           tap2maxforce  = 0; // the maximum force registered during the second tap
 
 unsigned long sound1t      = 0; // the time at which the first sound was played
 unsigned long sound2t      = 0; // the time at which the second sound was played
