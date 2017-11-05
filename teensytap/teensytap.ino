@@ -111,8 +111,13 @@ int ncontinuation_clicks       = 0; // how many continuation clicks to present a
 int delay1 = 0; // the delay to be presented for the first tap
 int delay2 = 0; // the delay to be presented for the second tap
 
-unsigned long tap1t        = 0; // the time at which the first tap was registered
-unsigned long tap2t        = 0; // the time at which the second tap was registered
+unsigned long tap1on        = 0; // the time at which the first tap was registered
+unsigned long tap1off       = 0; // offset time of the first tap
+int           tap1maxforce  = 0; // the maximum force registered during the first tap
+
+unsigned long tap2on        = 0; // the time at which the second tap was registered
+unsigned long tap2off       = 0; // offset time of the second tap
+unsigned long tap2maxforce  = 0; // the maximum force registered during the second tap
 
 unsigned long sound1t      = 0; // the time at which the first sound was played
 unsigned long sound2t      = 0; // the time at which the second sound was played
@@ -260,12 +265,12 @@ void do_delaydetect_activity() {
 	// Schedule the next tap feedback time (if we deliver feedback)
 	if (current_tap==1) {
 	  next_feedback_t = current_t + delay1;
-	  tap1t = current_t;
+	  tap1on = current_t;
 	}
 
 	if (current_tap==2) {
 	  next_feedback_t = current_t + delay2;
-	  tap2t = current_t;
+	  tap2on = current_t;
 	}
 
       }
@@ -286,6 +291,15 @@ void do_delaydetect_activity() {
 	
 	tap_phase = 0; // currently we are in the tap "OFF" phase
 	tap_offset_t = current_t;
+
+	if (current_tap==1) {
+	  tap1off      = current_t;
+	  tap1maxforce = tap_max_force;
+	}
+	if (current_tap==2) {
+	  tap2off      = current_t;
+	  tap2maxforce = tap_max_force;
+	}
 	
 	// don't allow an offset immediately; freeze the phase for a little while
 	next_event_embargo_t = current_t + min_tap_off_duration;
@@ -635,15 +649,19 @@ void read_delaydetect_config_from_serial() {
   while (!(Serial.available()>=DELAYDETECT_LENGTH)) {
     // Wait until we have enough info
   }
-  Serial.print("# ... starting to read...\n");
+  //Serial.print("# ... starting to read...\n");
 
   delay1 = readint();
   delay2 = readint();
 
   Serial.print("# Config received...\n");
   
-  tap1t        = 0;
-  tap2t        = 0;
+  tap1on       = 0;
+  tap1off      = 0;
+  tap1maxforce = 0;
+  tap2on       = 0;
+  tap2off      = 0;
+  tap2maxforce = 0;
   sound1t      = 0;
   sound2t      = 0;
   current_tap  = 0;
@@ -671,10 +689,10 @@ void read_delaydetect_config_from_serial() {
 
 void send_delaydetect_to_serial() {
   /* Sends a report of the current trial to the computer */
-  char msg[200];
+  char msg[300];
   //msg_number += 1; // This is the next message
-  sprintf(msg, "TAP1T=%lu SOUND1T=%lu TAP2T=%lu SOUND2T=%lu\n"
-	  ,       tap1t,     sound1t,    tap2t,     sound2t);
+  sprintf(msg, "TAP1ON=%lu TAP1OFF=%lu TAP1FORCE=%d SOUND1T=%lu TAP2ON=%lu TAP2OFF=%lu TAP2FORCE=%d SOUND2T=%lu\n"
+	  ,       tap1on,   tap1off,   tap1maxforce, sound1t,    tap2on,    tap2off,   tap2maxforce,  sound2t);
   Serial.print(msg);
 }
 

@@ -275,7 +275,7 @@ def single_trial():
 
 
 def write_log_header():
-    header = "trial timestamp delay1 delay2 tap1.t tap2.t sound1.t sound2.t response"
+    header = "trial timestamp delay1 delay2 tap1on_t tap1off_t tap1_force sound1_t tap2on_t tap2off_t tap2force sound2_t response"
     with open(config["out.filename"],'a') as f:
         f.write(header+"\n")
     
@@ -291,21 +291,25 @@ def process_response():
     config["in.buffer"]
 
     # Now we are looking for something like this in the buffer TAP1T=33992 SOUND1T=33992 TAP2T=34486 SOUND2T=34636
-    res = re.search(r"TAP1T=(\d+)[\s]+SOUND1T=(\d+)[\s]+TAP2T=(\d+)[\s]SOUND2T=(\d+)", config["in.buffer"], flags=0)
+    res = re.search(r"TAP1ON=(\d+)[\s]+TAP1OFF=(\d+)[\s]+TAP1FORCE=(\d+)[\s]+SOUND1T=(\d+)[\s]+TAP2ON=(\d+)[\s]+TAP2OFF=(\d+)[\s]+TAP2FORCE=(\d+)[\s]+SOUND2T=(\d+)", config["in.buffer"], flags=0)
     if not res:
         error_message("Error!\n\nI did not receive the proper trial report from the Teensy.\n\nDid the subject actually complete the two taps?")
         return
-    tap1t,fb1t,tap2t,fb2t=res.groups()
+    tap1on,tap1off,tap1f,fb1t,tap2on,tap2off,tap2force,fb2t=res.groups()
     
-    report = "%i %s %i %i %s %s %s %s %s"%(config["trial"],
-                                           config["timestamp"],
-                                           config["delay1"],
-                                           config["delay2"],
-                                           tap1t,  #-- right, notice that the times come in as strings so why not keep them that way
-                                           tap2t,
-                                           fb1t,
-                                           fb2t,
-                                           config["response"])
+    report = "%i %s %i %i %s %s %s %s %s %s %s %s %s"%(config["trial"],
+                                                       config["timestamp"],
+                                                       config["delay1"],
+                                                       config["delay2"],
+                                                       tap1on,  #-- right, notice that the times come in as strings so why not keep them that way
+                                                       tap1off,
+                                                       tap1force,
+                                                       fb1t,
+                                                       tap2on,
+                                                       tap2off,
+                                                       tap2force,
+                                                       fb2t,
+                                                       config["response"])
 
     # Output to file if we have a output filename
     with open(config["out.filename"],'a') as f:
