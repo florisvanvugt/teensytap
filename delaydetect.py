@@ -16,11 +16,14 @@ MESSAGE_STOP               = 55
 
 
 # The delays to be presented (in ms)
-DELAYS = [ 25, 50, 75, 100, 125, 150, 175, 200 ]
+#DELAYS = [ 25, 50, 75, 100, 125, 150, 175, 200 ]
+#DELAYS = [ 25, 50, 100, 200 ]
+DELAYS = [ 10, 20, 30, 50, 100 ]
+
 
 # How often each delay is presented
-N_REPETITIONS = 10
-
+#N_REPETITIONS = 10
+N_REPETITIONS = 8
 
 
 import sys
@@ -235,7 +238,12 @@ def next_trial():
         config["running.block"]=False
         config["running"]      =False
         show_message("Block completed.")
-        
+        update_enabled()
+        return
+
+    output("")
+    output("### Trial %i ###"%config["trial"])
+    
     
     # The delay to be tested on this trial
     delay = config["trials"][config["trial"]]
@@ -285,17 +293,17 @@ def process_response():
     """ The subject has responded something, and now we process the 
     data we got from Teensy to put into the log file."""
 
+    print("Processing response %s"%config["response"])
     # Make a little report about this trial
 
     # Here I need to process the incoming buffer
-    config["in.buffer"]
 
     # Now we are looking for something like this in the buffer TAP1T=33992 SOUND1T=33992 TAP2T=34486 SOUND2T=34636
     res = re.search(r"TAP1ON=(\d+)[\s]+TAP1OFF=(\d+)[\s]+TAP1FORCE=(\d+)[\s]+SOUND1T=(\d+)[\s]+TAP2ON=(\d+)[\s]+TAP2OFF=(\d+)[\s]+TAP2FORCE=(\d+)[\s]+SOUND2T=(\d+)", config["in.buffer"], flags=0)
     if not res:
         error_message("Error!\n\nI did not receive the proper trial report from the Teensy.\n\nDid the subject actually complete the two taps?")
         return
-    tap1on,tap1off,tap1f,fb1t,tap2on,tap2off,tap2force,fb2t=res.groups()
+    tap1on,tap1off,tap1force,fb1t,tap2on,tap2off,tap2force,fb2t=res.groups()
     
     report = "%i %s %i %i %s %s %s %s %s %s %s %s %s"%(config["trial"],
                                                        config["timestamp"],

@@ -124,7 +124,7 @@ unsigned long sound2t      = 0; // the time at which the second sound was played
 
 int current_tap = 0; // the current tap (e.g. current_tap=1 if the subject has tapped once)
 
-
+boolean ready_to_send = false; // whether we are ready to send the report to the serial interface (to the computer)
 
 
 /*
@@ -327,15 +327,17 @@ void do_delaydetect_activity() {
 
       if (current_tap==1) sound1t = current_t;
       if (current_tap==2) sound2t = current_t;
-      
-      if (current_tap==2) {
-	// If this was the second tap, then this is it! End of trial.
 
-	active = false;
-	send_delaydetect_to_serial(); // Communicate what we did to the computer
-	
-      }
+    }
 
+    // When is the trial completed?
+    // First, we need to have presented the
+    // feedback for the tap (which may be delayed) and
+    // second, we need to have registered the endpoint of the second tap (so that we know the force and everything)
+    ready_to_send = (current_tap>=2) && (current_t>=next_feedback_t) && (tap_phase==0);
+    if (ready_to_send) {
+      active = false;               // Make sure we drop whatever we were doing
+      send_delaydetect_to_serial(); // Communicate what we did to the computer
     }
     
     // Update the "previous" state of variables
@@ -549,6 +551,7 @@ void loop(void) {
 	
 	active        = true;
 	running_trial = true;
+	ready_to_send = false;
 	
 	next_feedback_t  = 0; // ensure that nothing is scheduled to happen any time soon
 	next_metronome_t = 0;
@@ -665,6 +668,7 @@ void read_delaydetect_config_from_serial() {
   sound1t      = 0;
   sound2t      = 0;
   current_tap  = 0;
+  ready_to_send= false;
 
   auditory_feedback          = 1;
   auditory_feedback_delay    = 0;
