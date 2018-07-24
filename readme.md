@@ -80,3 +80,28 @@ You will then see the graphical interface which you use as follows.
 ![diagonal view](misc/diagonalview_photo.jpg "Diagonal view of the setup")
 
 
+
+
+
+## Sub-millisecond timing resolution
+
+
+By default, the timing resolution of sounds on the Teensy is approximately 3 ms. If that's not enough for you and you want sub-millisecond timing, please do the following.
+
+Go to where you have installed the Arduino IDE. In that directory, open the file `/hardware/teensy/avr/cores/teensy3/AudioStream.h` in a text editor.
+
+Change the line
+```
+#define AUDIO_BLOCK_SAMPLES  128
+```
+
+to 
+```
+#define AUDIO_BLOCK_SAMPLES  32
+```
+
+(Note that `AUDIO_BLOCK_SAMPLES` is defined in various lines depending on the processor used -- for Teensy 3.2 it's `MK20DX128` which means you should edit the first occurrence of `AUDIO_BLOCK_SAMPLES` ).
+
+That's it! Recompile the code and you should be good to go.
+
+
