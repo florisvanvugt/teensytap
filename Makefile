@@ -3,7 +3,7 @@
 # If you want to use whatever arduino is already in your path
 ARDUINO := arduino
 # If you want to use a custom arduino location:
-ARDUINO := /usr/share/arduino-tinker/arduino
+#ARDUINO := /usr/share/arduino-tinker/arduino
 
 
 
