@@ -1,4 +1,13 @@
 
+
+# If you want to use whatever arduino is already in your path
+ARDUINO := arduino
+# If you want to use a custom arduino location:
+#ARDUINO := /usr/share/arduino-tinker/arduino
+
+
+
+
 default: gui
 
 readme: readme.html
@@ -18,12 +27,16 @@ development.html: development.md misc/github-pandoc.css
 .PHONY: teensytap/DeviceID.h # this ensures DeviceID.h will always be re-made
 
 teensytap/DeviceID.h:
-	python -c "import time; print('char DEVICE_ID[] = \"%s\";'%time.strftime('%Y/%m/%d %H:%M:%S'))" > teensytap/DeviceID.h
+	@echo "Determining Device ID"
+	@python -c "import time; print('char DEVICE_ID[] = \"%s\";'%time.strftime('%Y/%m/%d %H:%M:%S'))" > teensytap/DeviceID.h
 #python -c "import datetime; print(datetime.datetime.strftime('%h'))" 
 
 
 upload: teensytap/DeviceID.h teensytap/teensytap.ino
-	arduino --upload teensytap/teensytap.ino
+	@echo ""
+	@echo "### Compiling using $(ARDUINO)"
+	@echo ""
+	$(ARDUINO) -v --upload teensytap/teensytap.ino
 
 
 serial:
@@ -32,3 +45,5 @@ serial:
 
 gui:
 	python3 gui.py
+
+
