@@ -194,7 +194,126 @@ Trying to get an estimate of false positive rate. For this purpose I let the dev
 
 
 
+## 19 July 2018
 
+There is an issue with the timing of the metronome clicks. We seem to get a jitter of 2.9ms. Posted about this here: https://forum.pjrc.com/threads/50830-Timing-accuracy-using-Audio-library?s=54d856c96ef935d3c8b8ddc73b67a42b&p=177321#post177321
+
+The problem appears to be that the Audio library uses a buffering of 128 samples, i.e. 2.9ms at 44.1khz.
+So one solution could be to crank this down a little so that we have an acceptable delay, e.g. 32 samples would lead to 0.75 ms jitter.
+
+See also this discussion about changing the audio block size: https://forum.pjrc.com/threads/37131-Change-Audio-Block-Size
+
+Have to edit this -- https://github.com/PaulStoffregen/cores/blob/master/teensy3/AudioStream.h
+
+Now download https://github.com/PaulStoffregen/cores/ and go to teensy3.
+It includes a Makefile but that one needs to be pointed to the correct `ARDUINOPATH`.
+
+
+
+```
+sudo apt install gcc-arm-none-eabi
+```
+
+This is nice too because it allows everything-in-one compilation -- https://github.com/apmorton/teensy-template
+
+```
+cd libraries
+git clone https://github.com/PaulStoffregen/Audio.git
+git clone https://github.com/PaulStoffregen/SPI.git
+git clone https://github.com/PaulStoffregen/SD.git
+git clone https://github.com/PaulStoffregen/SerialFlash.git
+
+```
+
+This could be possible but didn't compile properly for me: 
+`git clone https://github.com/PaulStoffregen/Wire.git`
+
+```
+git clone https://github.com/nox771/i2c_t3
+```
+
+Then inside the Audio library, various files needed to be changed from `#include "Wire.h"` to `#include <i2c_t3.h>` (see https://forum.pjrc.com/threads/21680-New-I2C-library-for-Teensy3 ).
+
+
+Then had to do this inside `libraries` so that `sqrt_integer.h` is found:
+
+```
+ln -s Audio/utility/ Audio.utility
+```
+
+Then had to remove some brackets in `libraries/Audio/effect_freeverb.o` (see https://github.com/PaulStoffregen/Audio/issues/255)
+
+
+
+
+## Other approach: using `cores/teensy3` from Stoffregen
+
+```
+git clone https://github.com/PaulStoffregen/cores
+cd cores/teensy3
+export ARDUINOPATH=/usr/share/arduino # or wherever you have installed Arduino (& Teensyduino!)
+make
+```
+
+Copy the libraries into place.
+
+```
+mkdir lib
+cp -r /usr/share/arduino-1.8.5/hardware/teensy/avr/libraries/{Audio,SPI,SD,SerialFlash,Wire}/ lib
+``` 
+
+Tweaked the `Makefile` to read those libraries.
+
+Now also adapted `main.cpp` so that it only does the part that calls `setup()` and `loop()`.
+
+
+`-std=gnu++14` ?
+
+
+
+
+## Yet another thing -- going back to teensy-template
+
+Move libraries from `arduino-1.8.5` (see above).
+Cp Audio/utility into libraries (otherwise not found directly)
+
+Then taking teensy3 from the Stoffregen cores, not from the teensy-template.
+
+Rm teensy3/main.cpp
+
+Cp SD/utility to libraries
+
+--> THere is a general pattern here that subfolders of libraries are not included...
+
+
+
+--> Next thing: linking issue
+
+
+
+
+## Yet another thing - recommended approach
+
+1. Download Arduino 1.8.5 IDE, put it anywhere, in my case `/usr/share/arduino-tinker/`
+2. Install Teensyduino into that installation.
+
+Compile + install with:
+`/usr/share/arduino-tinker/arduino`
+
+Then edit the core in
+`/usr/share/arduino-tinker/hardware/teensy/avr/cores/teensy3/AudioStream.h`
+
+Change the line
+```
+#define AUDIO_BLOCK_SAMPLES  128
+```
+
+into 
+```
+#define AUDIO_BLOCK_SAMPLES  32
+```
+
+(Note that `AUDIO_BLOCK_SAMPLES` is defined in various lines depending on the processor used -- for Teensy 3.2 it's `MK20DX128` which means you should edit the first occurrence of `AUDIO_BLOCK_SAMPLES` ).
 
 
 

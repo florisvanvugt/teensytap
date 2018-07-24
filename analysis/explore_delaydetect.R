@@ -1,6 +1,6 @@
 
-
-fname <- 'Robert_delaydetection_20171106_162230.txt'
+fname <- "Alexandra_delaydetection_20171107_130049.txt"
+##fname <- 'Robert_delaydetection_20171106_162230.txt'
 ##fname <- 'Thomas_delaydetection_20171106_151624.txt'
 dat <- read.table(fname,header=T)
 

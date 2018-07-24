@@ -24,8 +24,11 @@ A framework for running sensorimotor synchronisation experiment. The framework i
 The following software is required only once for uploading the code to Teensy.
 From then on you can use it on any computer that fulfills the above software requirements.
 
-* [Arduino IDE](https://www.arduino.cc/en/Main/Software)
+* [Arduino IDE](https://www.arduino.cc/en/Main/Software) -- make sure you get 1.8.5, not the latest, because that one is not compatible with Teensyduino, at least not at the time of writing this.
 * [Teensyduino extension for Arduino IDE](https://www.pjrc.com/teensy/teensyduino.html). Teensyduino is basically a set of tools that allow you to use the Arduino development environment to make code for your Teensy.
+
+
+If you want sub-millisecond timing resolution, see the note below.
 
 
 
@@ -78,5 +81,29 @@ You will then see the graphical interface which you use as follows.
 ![side view](misc/sideview_photo.jpg "Side view of the setup")
 
 ![diagonal view](misc/diagonalview_photo.jpg "Diagonal view of the setup")
+
+
+
+
+## Sub-millisecond timing resolution
+
+
+By default, the timing resolution of sounds on the Teensy is approximately 3 ms. If that's not enough for you and you want sub-millisecond timing, please do the following.
+
+Go to where you have installed the Arduino IDE. In that directory, open the file `/hardware/teensy/avr/cores/teensy3/AudioStream.h` in a text editor.
+
+Change the line
+```
+#define AUDIO_BLOCK_SAMPLES  128
+```
+
+to 
+```
+#define AUDIO_BLOCK_SAMPLES  32
+```
+
+(Note that `AUDIO_BLOCK_SAMPLES` is defined in various lines depending on the processor used -- for Teensy 3.2 it's `MK20DX128` which means you should edit the first occurrence of `AUDIO_BLOCK_SAMPLES` ).
+
+That's it! Recompile the code and you should be good to go.
 
 
