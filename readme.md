@@ -105,3 +105,8 @@ to
 That's it! Recompile the code and you should be good to go.
 
 
+
+
+# TODO
+
+- [ ] Check baudrate -- see how long the serial writes take (this may disrupt the functionality)
