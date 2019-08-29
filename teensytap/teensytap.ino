@@ -353,8 +353,9 @@ void loop(void) {
 
       // Compute when this trial will end
       trial_end_t = current_t;
-      if (metronome)
-	trial_end_t += (metronome_nclicks+1)*metronome_interval; // the +1 here is because from the start moment we will wait one metronome period until we actually start registering
+      if (metronome) {
+	trial_end_t += (metronome_nclicks_predelay+metronome_nclicks+1)*metronome_interval; // the +1 here is because from the start moment we will wait one metronome period until we actually start registering
+      }
       trial_end_t   += (ncontinuation_clicks*metronome_interval);
       
       active        = true;
