@@ -50,6 +50,8 @@ That's it!
 
 3. Download or clone this repository (i.e. `git clone http://github.com/florisvanvugt/teensytap`).
 
+4. Install pyserial. The best way is to use pip, e.e. `pip install pyserial`.
+
 4. Upload the Teensy code. Two options to do this: (a) Run `make upload` (this requires that you have `make` installed, which you can do under Ubuntu with `sudo apt install build-essential`). Alternatively (b) open the `teensytap/teensytap.ino` script in the Arduino IDE and then upload it from there (see the Teensyduino documentation for how this works).
 
 
