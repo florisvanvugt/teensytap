@@ -42,18 +42,23 @@ Refer to the circuit diagram `wiring.svg` included here.
 That's it!
 
 
+### Installation (needs to be done only once)
 
-### Uploading the Teensy code
-You can either open the `teensytap/teensytap.ino` script in the Arduino IDE and then upload it from there (see the Teensyduino documentation for how this works). Or, if you have a good build environment, you can simply run:
+1. Download the [Arduino IDE](https://www.arduino.cc/en/Main/Software) - **important** make sure you download version **1.8.9** (Teensyduino only works with some specific versions of Arduino IDE).
 
-```
-make upload
-```
+2. Download [Teensyduino](https://www.pjrc.com/teensy/td_download.html) and run the installer, pointing it to where you have installed the Arduino code. If you're under Linux, make sure you download the udev rules as indicated on the site above.
+
+3. Download or clone this repository (i.e. `git clone http://github.com/florisvanvugt/teensytap`).
+
+4. Upload the Teensy code. Two options to do this: (a) Run `make upload` (this requires that you have `make` installed, which you can do under Ubuntu with `sudo apt install build-essential`). Alternatively (b) open the `teensytap/teensytap.ino` script in the Arduino IDE and then upload it from there (see the Teensyduino documentation for how this works).
+
+
+
 
 ### Running
 Run the GUI script:
 
-`python3 gui.py`
+`python3 gui.py` (or simply `make gui`)
 
 You will then see the graphical interface which you use as follows.
 
