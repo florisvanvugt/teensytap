@@ -2,7 +2,7 @@
 
 A framework for running sensorimotor synchronisation experiment. The framework is based on Teensy and the Audio Adapter, which are inexpensive and readily available for purchase at many retailers internationally. The code provided here will allow the Teensy to record finger tapping and deliver auditory feedback over headphones, optionally with a pre-specified delay, and simultaneously present metronome click sounds. Data is communicated to the computer via USB for offline analysis.
 
-[Demonstration video](https://vimeo.com/236833791)
+[See the demonstration video!](https://youtu.be/WwA4infAf5g)
 
 ![alt text](misc/setup_photo_annotations.png "Setup example")
 
@@ -44,13 +44,17 @@ That's it!
 
 ### Installation (needs to be done only once)
 
+See the [installation video](https://youtu.be/wIUFWRm3EA0).
+
 1. Download the [Arduino IDE](https://www.arduino.cc/en/Main/Software) - **important** make sure you download version **1.8.9** (Teensyduino only works with some specific versions of Arduino IDE).
 
 2. Download [Teensyduino](https://www.pjrc.com/teensy/td_download.html) and run the installer, pointing it to where you have installed the Arduino code. If you're under Linux, make sure you download the udev rules as indicated on the site above.
 
 3. Download or clone this repository (i.e. `git clone http://github.com/florisvanvugt/teensytap`).
 
-4. Install pyserial. The best way is to use pip, e.e. `pip install pyserial`.
+4. Install pyserial. The best way is to use pip, e.e. `sudo pip install pyserial`.
+
+5. Tell TeensyTap where you have installed the Arduino code. To do this, edit the file `Makefile` with any text editor and change the line starting with `ARDUINO :=` to point to wherever you have installed the arduino IDE.
 
 4. Upload the Teensy code. Two options to do this: (a) Run `make upload` (this requires that you have `make` installed, which you can do under Ubuntu with `sudo apt install build-essential`). Alternatively (b) open the `teensytap/teensytap.ino` script in the Arduino IDE and then upload it from there (see the Teensyduino documentation for how this works).
 
@@ -92,8 +96,9 @@ You will then see the graphical interface which you use as follows.
 
 ## Sub-millisecond timing resolution
 
-
 By default, the timing resolution of sounds on the Teensy is approximately 3 ms. If that's not enough for you and you want sub-millisecond timing, please do the following.
+
+This is also shown in a [video](https://youtu.be/DVS2NKvLXm0).
 
 Go to where you have installed the Arduino IDE. In that directory, open the file `/hardware/teensy/avr/cores/teensy3/AudioStream.h` in a text editor.
 
