@@ -56,7 +56,7 @@ See the [installation video](https://youtu.be/wIUFWRm3EA0).
 
 5. Tell TeensyTap where you have installed the Arduino code. To do this, edit the file `Makefile` with any text editor and change the line starting with `ARDUINO :=` to point to wherever you have installed the arduino IDE.
 
-4. Upload the Teensy code. Two options to do this: (a) Run `make upload` (this requires that you have `make` installed, which you can do under Ubuntu with `sudo apt install build-essential`). Alternatively (b) open the `teensytap/teensytap.ino` script in the Arduino IDE and then upload it from there (see the Teensyduino documentation for how this works).
+4. Upload the Teensy code. Two options to do this: (a) Run `make upload` (this requires that you have `make` installed, which you can do under Ubuntu with `sudo apt install build-essential`). Alternatively (b) open the `teensytap/teensytap.ino` script in the Arduino IDE and then upload it from there (see the Teensyduino documentation for how this works). If you take this latter step instead of using `make`, you will need to rename the file `teensytap/DeviceID_custom.h` to `teensytap/DeviceID.h`.
 
 
 
