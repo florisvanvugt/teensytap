@@ -4,6 +4,10 @@ A framework for running sensorimotor synchronisation experiment. The framework i
 
 [See the demonstration video!](https://youtu.be/WwA4infAf5g)
 
+If you use this code in scientific work, please kindly cite the corresponding article:
+
+van Vugt FT. The TeensyTap framework for sensorimotor synchronization experiments. Adv Cogn Psychol 16(4): 302-308. doi: 10.5709/acp-0304-y. [pdf](http://www.ac-psych.org/en/download-pdf/id/309)
+
 ![alt text](misc/setup_photo_annotations.png "Setup example")
 
 ## Requirements
