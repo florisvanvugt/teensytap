@@ -50,9 +50,9 @@ That's it!
 
 See the [installation video](https://youtu.be/wIUFWRm3EA0).
 
-1. Download the [Arduino IDE](https://www.arduino.cc/en/Main/Software) - **important** make sure you download version **1.8.9** (Teensyduino only works with some specific versions of Arduino IDE).
+1. Download the [Arduino IDE](https://www.arduino.cc/en/Main/Software) - **important** make sure you download version **1.8.19** (Teensyduino only works with some specific versions of Arduino IDE).
 
-2. Download [Teensyduino](https://www.pjrc.com/teensy/td_download.html) and run the installer, pointing it to where you have installed the Arduino code. If you're under Linux, make sure you download the udev rules as indicated on the site above.
+2. Download [Teensyduino](https://www.pjrc.com/teensy/td_download.html) version 1.57 and run the installer, pointing it to where you have installed the Arduino code. If you're under Linux, make sure you download the udev rules as indicated on the site above.
 
 3. Download or clone this repository (i.e. `git clone http://github.com/florisvanvugt/teensytap`).
 
